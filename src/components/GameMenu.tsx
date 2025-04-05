@@ -28,7 +28,7 @@ export function GameMenu() {
                   key={type}
                   onClick={() => {
                     setSelectedPlantType(type as PlantType);
-                    setIsInventoryOpen(false);
+                    setIsInventoryOpen(true);
                   }}
                   className={`w-full flex justify-between items-center p-2 rounded ${
                     selectedPlantType === type

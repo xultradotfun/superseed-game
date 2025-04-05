@@ -6,6 +6,7 @@ export const SOUND_MANIFEST = {
     "plant-seed": "/sounds/effects/plant-seed.mp3",
     "water-drop": "/sounds/effects/water-drop.mp3",
     grow: "/sounds/effects/grow.mp3",
+    harvest: "/sounds/effects/harvest.mp3",
   },
   ui: {
     click: "/sounds/ui/click.mp3",

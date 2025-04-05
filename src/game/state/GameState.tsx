@@ -61,6 +61,7 @@ type GameState = {
   addPlant: (position: Vector3, type: PlantType) => void;
   waterPlant: (plantId: string) => void;
   handlePlanting: (position: Vector3) => void;
+  harvestPlant: (plantId: string) => void;
 };
 
 const GameStateContext = createContext<GameState | null>(null);
@@ -101,6 +102,38 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     soundSystem.play("effects", "water-drop");
   };
 
+  const harvestPlant = (id: string) => {
+    console.log("Attempting to harvest plant:", id);
+    const plant = plants[id];
+    console.log("Plant data:", plant);
+    if (plant && plant.growthStage >= 1) {
+      console.log("Plant is ready for harvest");
+      // Add seeds to inventory (2-3 seeds per harvest)
+      const seedCount = Math.floor(Math.random() * 2) + 2;
+      console.log("Adding", seedCount, "seeds to inventory");
+      setInventory((prev) => ({
+        ...prev,
+        [plant.type]: prev[plant.type] + seedCount,
+      }));
+
+      // Remove the plant
+      setPlants((prev) => {
+        const newPlants = { ...prev };
+        delete newPlants[id];
+        return newPlants;
+      });
+
+      // Play harvest sound
+      soundSystem.play("effects", "harvest");
+      console.log("Plant harvested successfully");
+    } else {
+      console.log("Plant not ready for harvest:", {
+        plant,
+        growthStage: plant?.growthStage,
+      });
+    }
+  };
+
   const handlePlanting = (position: Vector3) => {
     if (selectedPlantType && canPlantAt(position, plants)) {
       if (inventory[selectedPlantType] > 0) {
@@ -125,6 +158,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
         addPlant,
         waterPlant,
         handlePlanting,
+        harvestPlant,
       }}
     >
       {children}

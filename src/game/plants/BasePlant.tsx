@@ -6,9 +6,11 @@ import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import { ParticleSystem } from "@/game/effects/ParticleSystem";
 import { usePlantInteraction } from "./PlantInteraction";
+import { useGameState } from "@/game/state/GameState";
+import { soundSystem } from "@/game/audio/SoundSystem";
 
 export type BasePlantProps = {
-  id?: string;
+  id: string;
   position?: [number, number, number];
   growthStage?: number;
   config: {
@@ -39,12 +41,19 @@ export function BasePlant({
   const plantRef = useRef<Group>(null);
   const lightRef = useRef<PointLight>(null);
   const [isWatering, setIsWatering] = useState(false);
+  const [isHarvestHovered, setIsHarvestHovered] = useState(false);
   const { hoveredPlantId, setHoveredPlantId } = usePlantInteraction();
+  const { harvestPlant } = useGameState();
 
   // Debug log for growth stage
   useEffect(() => {
-    console.log(`Plant ${id} growth stage:`, growthStage);
-  }, [id, growthStage]);
+    console.log(`Plant ${id} state:`, {
+      growthStage,
+      isFullyGrown: growthStage >= 1,
+      position,
+      config,
+    });
+  }, [id, growthStage, position, config]);
 
   // Animation and effects
   useFrame((state) => {
@@ -70,6 +79,22 @@ export function BasePlant({
       }
     }
   });
+
+  const handleHarvest = () => {
+    console.log("Harvest clicked:", {
+      id,
+      growthStage,
+      isFullyGrown: growthStage >= 1,
+      harvestFunctionExists: !!harvestPlant,
+    });
+    if (growthStage >= 1) {
+      console.log("Calling harvestPlant with id:", id);
+      harvestPlant(id);
+      soundSystem.play("effects", "harvest");
+    } else {
+      console.log("Plant not ready for harvest, growth stage:", growthStage);
+    }
+  };
 
   const baseScale = 0.8; // Base scale for the plant
   const flowerScale = 0.3 + growthStage * 0.7; // Scale for flower parts
@@ -109,18 +134,39 @@ export function BasePlant({
             center
             distanceFactor={8}
             style={{
-              background: "rgba(255, 255, 255, 0.9)",
+              background: isHarvestHovered
+                ? "rgba(255, 255, 255, 1)"
+                : "rgba(255, 255, 255, 0.9)",
               padding: "8px 12px",
               borderRadius: "16px",
               border: "3px solid rgba(0, 0, 0, 0.8)",
               fontSize: "32px",
-              pointerEvents: "none",
+              cursor: "pointer",
               userSelect: "none",
               boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
               fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+              transform: isHarvestHovered ? "scale(1.1)" : "scale(1)",
+              transition: "all 0.2s ease-out",
+              pointerEvents: "auto",
+            }}
+            onPointerEnter={() => setIsHarvestHovered(true)}
+            onPointerLeave={() => setIsHarvestHovered(false)}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log("Harvest HTML element clicked");
+              handleHarvest();
             }}
           >
-            {"🌾"}
+            <div
+              style={{ pointerEvents: "auto" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log("Inner div clicked");
+                handleHarvest();
+              }}
+            >
+              🌾
+            </div>
           </Html>
 
           {/* Sparkle particles */}
@@ -138,7 +184,7 @@ export function BasePlant({
           <pointLight
             position={[0, stemHeight + 0.8, 0]}
             distance={1.5}
-            intensity={2}
+            intensity={isHarvestHovered ? 3 : 2}
             color="#ffffff"
           />
         </>
