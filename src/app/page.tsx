@@ -1,9 +1,12 @@
 import Scene from "@/components/Scene";
+import { GameStateProvider } from "@/game/state/GameState";
 
 export default function Home() {
   return (
     <main>
-      <Scene />
+      <GameStateProvider>
+        <Scene />
+      </GameStateProvider>
     </main>
   );
 }
