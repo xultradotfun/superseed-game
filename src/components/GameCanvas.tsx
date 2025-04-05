@@ -4,7 +4,6 @@ import { Canvas } from "@react-three/fiber";
 import {
   OrbitControls,
   PerspectiveCamera,
-  Environment,
   BakeShadows,
   SoftShadows,
 } from "@react-three/drei";
@@ -15,6 +14,7 @@ import { EthereumEssence } from "@/game/plants/EthereumEssence";
 import { OPStackOrchid } from "@/game/plants/OPStackOrchid";
 import { DeFiDandelion } from "@/game/plants/DeFiDandelion";
 import { SceneLighting } from "@/game/environment/SceneLighting";
+import { Sky } from "@/game/environment/Sky";
 import { useGameState, Plant } from "@/game/state/GameState";
 
 export function GameCanvas() {
@@ -75,16 +75,16 @@ export function GameCanvas() {
       <Suspense fallback={null}>
         <PerspectiveCamera makeDefault position={[8, 8, 8]} />
 
+        {/* Sky and Atmosphere */}
+        <Sky />
+        <fog attach="fog" args={["#7CC6DE", 30, 60]} />
+
         {/* Enhanced shadows */}
         <SoftShadows size={40} samples={20} focus={0.5} />
         <BakeShadows />
 
         {/* Lighting and effects */}
         <SceneLighting />
-
-        {/* Environment */}
-        <Environment preset="sunset" background blur={0.8} />
-        <fog attach="fog" args={["#ffe4d6", 15, 40]} />
 
         {/* Game Elements */}
         <Island />
