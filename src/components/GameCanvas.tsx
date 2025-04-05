@@ -5,6 +5,8 @@ import {
   OrbitControls,
   PerspectiveCamera,
   Environment,
+  BakeShadows,
+  SoftShadows,
 } from "@react-three/drei";
 import { Suspense } from "react";
 import { Island } from "@/game/environment/Island";
@@ -12,7 +14,7 @@ import { LuminaBloom } from "@/game/plants/LuminaBloom";
 import { EthereumEssence } from "@/game/plants/EthereumEssence";
 import { OPStackOrchid } from "@/game/plants/OPStackOrchid";
 import { DeFiDandelion } from "@/game/plants/DeFiDandelion";
-import { DayNightCycle } from "@/game/environment/DayNightCycle";
+import { SceneLighting } from "@/game/environment/SceneLighting";
 import { useGameState, Plant } from "@/game/state/GameState";
 
 export function GameCanvas() {
@@ -64,14 +66,25 @@ export function GameCanvas() {
   };
 
   return (
-    <Canvas shadows>
+    <Canvas
+      shadows="soft"
+      gl={{
+        antialias: true,
+      }}
+    >
       <Suspense fallback={null}>
         <PerspectiveCamera makeDefault position={[8, 8, 8]} />
-        <DayNightCycle />
+
+        {/* Enhanced shadows */}
+        <SoftShadows size={40} samples={20} focus={0.5} />
+        <BakeShadows />
+
+        {/* Lighting and effects */}
+        <SceneLighting />
 
         {/* Environment */}
-        <Environment preset="sunset" />
-        <fog attach="fog" args={["#ffd4b9", 10, 50]} />
+        <Environment preset="sunset" background blur={0.8} />
+        <fog attach="fog" args={["#ffe4d6", 15, 40]} />
 
         {/* Game Elements */}
         <Island />
@@ -83,6 +96,8 @@ export function GameCanvas() {
           maxPolarAngle={Math.PI * 0.45}
           minDistance={5}
           maxDistance={20}
+          enableDamping
+          dampingFactor={0.05}
         />
       </Suspense>
     </Canvas>
