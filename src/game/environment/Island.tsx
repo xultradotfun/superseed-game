@@ -1,18 +1,19 @@
 "use client";
 
 import { useRef } from "react";
-import { Mesh } from "three";
-import { useFrame, useThree } from "@react-three/fiber";
+import { Mesh, Vector3 } from "three";
+import { useFrame, useThree, ThreeEvent } from "@react-three/fiber";
 import { useGameState } from "@/game/state/GameState";
 
 export function Island() {
   const islandRef = useRef<Mesh>(null);
-  const { plantingMode, handlePlanting } = useGameState();
+  const { selectedPlantType, handlePlanting } = useGameState();
   const { raycaster, camera, pointer } = useThree();
 
   // Handle click events for planting
-  const handleClick = () => {
-    if (!plantingMode || !islandRef.current) return;
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    e.stopPropagation();
+    if (!selectedPlantType || !islandRef.current) return;
 
     // Update the raycaster with current pointer position
     raycaster.setFromCamera(pointer, camera);
@@ -22,8 +23,9 @@ export function Island() {
 
     if (intersects.length > 0) {
       const point = intersects[0].point;
-      // Offset the plant position slightly above the surface
-      handlePlanting([point.x, point.y + 0.1, point.z]);
+      // Create a Vector3 for the plant position
+      const position = new Vector3(point.x, point.y + 0.1, point.z);
+      handlePlanting(position);
     }
   };
 
@@ -36,8 +38,13 @@ export function Island() {
   });
 
   return (
-    <group onClick={handleClick}>
-      <mesh ref={islandRef} position={[0, -1, 0]} receiveShadow>
+    <group>
+      <mesh
+        ref={islandRef}
+        position={[0, -1, 0]}
+        receiveShadow
+        onClick={handleClick}
+      >
         {/* Main island body */}
         <cylinderGeometry args={[5, 6, 2, 32]} />
         <meshStandardMaterial color="#90a959" roughness={0.8} />

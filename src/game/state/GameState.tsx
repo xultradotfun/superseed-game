@@ -19,7 +19,7 @@ export type PlantType =
 export type Plant = {
   id: string;
   type: PlantType;
-  position: Vector3;
+  position: [number, number, number];
   growthStage: number;
   lastWatered: number;
 };
@@ -35,7 +35,7 @@ const generateId = () => Math.random().toString(36).substring(7);
 const generateNewPlant = (position: Vector3, type: PlantType): Plant => ({
   id: generateId(),
   type,
-  position,
+  position: [position.x, position.y, position.z],
   growthStage: 0,
   lastWatered: Date.now(),
 });
@@ -45,9 +45,12 @@ const canPlantAt = (position: Vector3, plants: Plants) => {
   if (position.y < 0 || position.y > 10) return false;
 
   // Check if there's already a plant within 1 unit
-  return !Object.values(plants).some(
-    (plant) => plant.position.distanceTo(position) < 1
-  );
+  return !Object.values(plants).some((plant) => {
+    const dx = plant.position[0] - position.x;
+    const dy = plant.position[1] - position.y;
+    const dz = plant.position[2] - position.z;
+    return Math.sqrt(dx * dx + dy * dy + dz * dz) < 1;
+  });
 };
 
 type GameState = {
@@ -81,13 +84,9 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addPlant = (position: Vector3, type: PlantType) => {
-    if (inventory[type] > 0) {
-      const id = generateId();
-      const plant = generateNewPlant(position, type);
-      setPlants((prev) => ({ ...prev, [id]: plant }));
-      setInventory((prev) => ({ ...prev, [type]: prev[type] - 1 }));
-      soundSystem.play("effects", "plant-seed");
-    }
+    const plant = generateNewPlant(position, type);
+    setPlants((prev) => ({ ...prev, [plant.id]: plant }));
+    soundSystem.play("effects", "plant-seed");
   };
 
   const waterPlant = (id: string) => {
@@ -104,8 +103,15 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
 
   const handlePlanting = (position: Vector3) => {
     if (selectedPlantType && canPlantAt(position, plants)) {
-      addPlant(position, selectedPlantType);
-      soundSystem.play("ui", "success");
+      if (inventory[selectedPlantType] > 0) {
+        addPlant(position, selectedPlantType);
+        setInventory((prev) => ({
+          ...prev,
+          [selectedPlantType]: prev[selectedPlantType] - 1,
+        }));
+        setSelectedPlantType(null);
+        soundSystem.play("ui", "success");
+      }
     }
   };
 

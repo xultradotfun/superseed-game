@@ -10,6 +10,8 @@ import { Suspense } from "react";
 import { Island } from "@/game/environment/Island";
 import { LuminaBloom } from "@/game/plants/LuminaBloom";
 import { EthereumEssence } from "@/game/plants/EthereumEssence";
+import { OPStackOrchid } from "@/game/plants/OPStackOrchid";
+import { DeFiDandelion } from "@/game/plants/DeFiDandelion";
 import { DayNightCycle } from "@/game/environment/DayNightCycle";
 import { useGameState, Plant } from "@/game/state/GameState";
 
@@ -17,11 +19,7 @@ export function GameCanvas() {
   const { plants } = useGameState();
 
   const renderPlant = (plant: Plant) => {
-    const position: [number, number, number] = [
-      plant.position.x,
-      plant.position.y,
-      plant.position.z,
-    ];
+    const position = plant.position;
 
     switch (plant.type) {
       case "LuminaBloom":
@@ -36,6 +34,24 @@ export function GameCanvas() {
       case "EthereumEssence":
         return (
           <EthereumEssence
+            key={plant.id}
+            id={plant.id}
+            position={position}
+            growthStage={plant.growthStage}
+          />
+        );
+      case "OPStackOrchid":
+        return (
+          <OPStackOrchid
+            key={plant.id}
+            id={plant.id}
+            position={position}
+            growthStage={plant.growthStage}
+          />
+        );
+      case "DeFiDandelion":
+        return (
+          <DeFiDandelion
             key={plant.id}
             id={plant.id}
             position={position}
