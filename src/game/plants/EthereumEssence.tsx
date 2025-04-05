@@ -20,8 +20,8 @@ export function EthereumEssence(props: EthereumEssenceProps) {
     <BasePlant
       {...props}
       config={config}
-      renderPlantModel={({ plantRef, hoveredPlantId, id, growthStage }) => (
-        <group ref={plantRef} position={[0, 1.2, 0]}>
+      renderPlantModel={({ hoveredPlantId, id, growthStage }) => (
+        <group>
           {/* Main crystal */}
           <mesh>
             <octahedronGeometry args={[0.2]} />
@@ -33,8 +33,6 @@ export function EthereumEssence(props: EthereumEssenceProps) {
               }
               metalness={0.8}
               roughness={0.2}
-              transparent
-              opacity={1}
             />
           </mesh>
 
@@ -58,8 +56,6 @@ export function EthereumEssence(props: EthereumEssenceProps) {
                 }
                 metalness={0.6}
                 roughness={0.3}
-                transparent
-                opacity={1}
               />
             </mesh>
           ))}

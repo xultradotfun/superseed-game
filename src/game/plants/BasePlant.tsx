@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Group, PointLight } from "three";
 import { useFrame } from "@react-three/fiber";
+import { Html } from "@react-three/drei";
 import { ParticleSystem } from "@/game/effects/ParticleSystem";
 import { usePlantInteraction } from "./PlantInteraction";
 
@@ -21,7 +22,7 @@ export type BasePlantProps = {
     hitboxSize?: number;
   };
   renderPlantModel: (props: {
-    plantRef: React.RefObject<Group>;
+    plantRef: React.RefObject<Group | null>;
     hoveredPlantId: string | null;
     id?: string;
     growthStage: number;
@@ -31,7 +32,7 @@ export type BasePlantProps = {
 export function BasePlant({
   id,
   position = [0, 0, 0],
-  growthStage = 1,
+  growthStage = 0,
   config,
   renderPlantModel,
 }: BasePlantProps) {
@@ -39,6 +40,11 @@ export function BasePlant({
   const lightRef = useRef<PointLight>(null);
   const [isWatering, setIsWatering] = useState(false);
   const { hoveredPlantId, setHoveredPlantId } = usePlantInteraction();
+
+  // Debug log for growth stage
+  useEffect(() => {
+    console.log(`Plant ${id} growth stage:`, growthStage);
+  }, [id, growthStage]);
 
   // Animation and effects
   useFrame((state) => {
@@ -65,14 +71,16 @@ export function BasePlant({
     }
   });
 
-  const scale = 0.3 + growthStage * 0.7;
+  const baseScale = 0.8; // Base scale for the plant
+  const flowerScale = 0.3 + growthStage * 0.7; // Scale for flower parts
+  const stemHeight = 0.4 + growthStage * 0.8; // Stem grows from 0.4 to 1.2 units
   const hitboxSize = config.hitboxSize || 0.4;
 
   return (
-    <group position={position} scale={scale}>
+    <group position={position} scale={baseScale}>
       {/* Invisible hitbox for better interaction */}
       <mesh
-        position={[0, 0.8, 0]}
+        position={[0, stemHeight * 1.2, 0]}
         onPointerEnter={() => id && setHoveredPlantId(id)}
         onPointerLeave={() => hoveredPlantId === id && setHoveredPlantId(null)}
       >
@@ -92,9 +100,53 @@ export function BasePlant({
         </mesh>
       )}
 
+      {/* Growth completion indicator */}
+      {growthStage >= 1 && (
+        <>
+          {/* Wheat emoji chat bubble */}
+          <Html
+            position={[0, stemHeight + 0.8, 0]}
+            center
+            distanceFactor={8}
+            style={{
+              background: "rgba(255, 255, 255, 0.9)",
+              padding: "8px 12px",
+              borderRadius: "16px",
+              border: "3px solid rgba(0, 0, 0, 0.8)",
+              fontSize: "32px",
+              pointerEvents: "none",
+              userSelect: "none",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+            }}
+          >
+            {"🌾"}
+          </Html>
+
+          {/* Sparkle particles */}
+          <ParticleSystem
+            position={[0, stemHeight + 0.6, 0]}
+            color="#ffffff"
+            count={5}
+            spread={0.3}
+            lifetime={1}
+            size={0.03}
+            active={true}
+          />
+
+          {/* Glow light for the emoji */}
+          <pointLight
+            position={[0, stemHeight + 0.8, 0]}
+            distance={1.5}
+            intensity={2}
+            color="#ffffff"
+          />
+        </>
+      )}
+
       {/* Water particles */}
       <ParticleSystem
-        position={[0, 1.5, 0]}
+        position={[0, stemHeight * 1.5, 0]}
         color="#7ad7ff"
         count={15}
         spread={0.3}
@@ -103,42 +155,47 @@ export function BasePlant({
         active={isWatering && hoveredPlantId === id}
       />
 
-      {/* Stem */}
-      <mesh position={[0, 0.4, 0]}>
-        <cylinderGeometry args={[0.05, 0.05, 0.8, 8]} />
-        <meshStandardMaterial
-          color={config.colors.stem}
-          emissive={config.colors.stem}
-          emissiveIntensity={hoveredPlantId === id ? 0.2 : 0}
+      <group ref={plantRef}>
+        {/* Stem */}
+        <mesh position={[0, stemHeight / 2, 0]}>
+          <cylinderGeometry args={[0.05, 0.05, stemHeight, 8]} />
+          <meshStandardMaterial
+            color={config.colors.stem}
+            emissive={config.colors.stem}
+            emissiveIntensity={hoveredPlantId === id ? 0.2 : 0}
+          />
+        </mesh>
+
+        {/* Bulb */}
+        <mesh position={[0, 0.1, 0]}>
+          <sphereGeometry args={[0.1, 8, 8]} />
+          <meshStandardMaterial
+            color={config.colors.stem}
+            emissive={config.colors.stem}
+            emissiveIntensity={hoveredPlantId === id ? 0.2 : 0}
+            roughness={0.6}
+          />
+        </mesh>
+
+        {/* Plant-specific model with growth scaling */}
+        <group position={[0, stemHeight, 0]} scale={flowerScale}>
+          {renderPlantModel({
+            plantRef,
+            hoveredPlantId,
+            id,
+            growthStage,
+          })}
+        </group>
+
+        {/* Glow light */}
+        <pointLight
+          ref={lightRef}
+          position={[0, stemHeight, 0]}
+          distance={2}
+          intensity={1 * growthStage * (hoveredPlantId === id ? 2 : 1)}
+          color={config.colors.primary}
         />
-      </mesh>
-
-      {/* Bulb */}
-      <mesh position={[0, 0.1, 0]}>
-        <sphereGeometry args={[0.1, 8, 8]} />
-        <meshStandardMaterial
-          color={config.colors.stem}
-          emissive={config.colors.stem}
-          emissiveIntensity={hoveredPlantId === id ? 0.2 : 0}
-          roughness={0.6}
-        />
-      </mesh>
-
-      {/* Plant-specific model */}
-      {renderPlantModel({
-        plantRef,
-        hoveredPlantId,
-        id,
-        growthStage,
-      })}
-
-      {/* Glow light */}
-      <pointLight
-        ref={lightRef}
-        distance={2}
-        intensity={1 * growthStage * (hoveredPlantId === id ? 2 : 1)}
-        color={config.colors.primary}
-      />
+      </group>
     </group>
   );
 }

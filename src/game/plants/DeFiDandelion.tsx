@@ -30,11 +30,11 @@ export function DeFiDandelion(props: DeFiDandelionProps) {
     <BasePlant
       {...props}
       config={config}
-      renderPlantModel={({ plantRef, hoveredPlantId, id, growthStage }) => (
+      renderPlantModel={({ hoveredPlantId, id, growthStage }) => (
         <>
           {/* Spore particles */}
           <ParticleSystem
-            position={[0, 1.5, 0]}
+            position={[0, 0.3, 0]}
             color={config.colors.primary}
             count={10}
             spread={0.8}
@@ -43,7 +43,7 @@ export function DeFiDandelion(props: DeFiDandelionProps) {
             active={isReleasing && growthStage > 0.5 && hoveredPlantId === id}
           />
 
-          <group ref={plantRef} position={[0, 1.2, 0]}>
+          <group>
             {/* Seed head */}
             <mesh>
               <sphereGeometry args={[0.2, 16, 16]} />
@@ -55,8 +55,6 @@ export function DeFiDandelion(props: DeFiDandelionProps) {
                 }
                 metalness={0.2}
                 roughness={0.8}
-                transparent
-                opacity={1}
               />
             </mesh>
 
@@ -81,8 +79,6 @@ export function DeFiDandelion(props: DeFiDandelionProps) {
                     }
                     metalness={0.3}
                     roughness={0.6}
-                    transparent
-                    opacity={1}
                   />
                 </mesh>
               );

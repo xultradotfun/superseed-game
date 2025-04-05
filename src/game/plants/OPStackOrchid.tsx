@@ -20,8 +20,8 @@ export function OPStackOrchid(props: OPStackOrchidProps) {
     <BasePlant
       {...props}
       config={config}
-      renderPlantModel={({ plantRef, hoveredPlantId, id, growthStage }) => (
-        <group ref={plantRef} position={[0, 1.2, 0]}>
+      renderPlantModel={({ hoveredPlantId, id, growthStage }) => (
+        <group>
           {/* Floating flower segments */}
           {[0, 1, 2].map((i) => (
             <mesh key={i} position={[0, i * 0.2, 0]}>
@@ -34,8 +34,6 @@ export function OPStackOrchid(props: OPStackOrchidProps) {
                 }
                 metalness={0.3}
                 roughness={0.7}
-                transparent
-                opacity={1}
               />
             </mesh>
           ))}
@@ -51,8 +49,6 @@ export function OPStackOrchid(props: OPStackOrchidProps) {
               }
               metalness={0.5}
               roughness={0.5}
-              transparent
-              opacity={1}
             />
           </mesh>
         </group>

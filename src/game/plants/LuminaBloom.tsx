@@ -20,8 +20,8 @@ export function LuminaBloom(props: LuminaBloomProps) {
     <BasePlant
       {...props}
       config={config}
-      renderPlantModel={({ plantRef, hoveredPlantId, id, growthStage }) => (
-        <group ref={plantRef} position={[0, 1.2, 0]}>
+      renderPlantModel={({ hoveredPlantId, id, growthStage }) => (
+        <group>
           {/* Petals */}
           <mesh>
             <sphereGeometry args={[0.2, 16, 16]} />
@@ -32,8 +32,7 @@ export function LuminaBloom(props: LuminaBloomProps) {
                 0.5 * growthStage * (hoveredPlantId === id ? 2 : 1)
               }
               roughness={0.2}
-              transparent
-              opacity={1}
+              metalness={0.3}
             />
           </mesh>
 
@@ -47,8 +46,7 @@ export function LuminaBloom(props: LuminaBloomProps) {
                 0.8 * growthStage * (hoveredPlantId === id ? 2 : 1)
               }
               roughness={0.1}
-              transparent
-              opacity={1}
+              metalness={0.4}
             />
           </mesh>
         </group>
