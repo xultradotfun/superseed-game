@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { Mesh, Vector3 } from "three";
-import { useFrame, useThree, ThreeEvent } from "@react-three/fiber";
+import { useThree, ThreeEvent } from "@react-three/fiber";
 import { useGameState } from "@/game/state/GameState";
 
 export function Island() {
@@ -23,19 +23,11 @@ export function Island() {
 
     if (intersects.length > 0) {
       const point = intersects[0].point;
-      // Create a Vector3 for the plant position
-      const position = new Vector3(point.x, point.y + 0.1, point.z);
+      // Create a Vector3 for the plant position, placing it exactly at y=0 (soil surface)
+      const position = new Vector3(point.x, 0, point.z);
       handlePlanting(position);
     }
   };
-
-  // Gentle floating animation
-  useFrame((state) => {
-    if (islandRef.current) {
-      islandRef.current.position.y =
-        Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
-    }
-  });
 
   return (
     <group>
