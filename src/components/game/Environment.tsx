@@ -27,7 +27,7 @@ function TerrainLayer({
 
 export function Island() {
   return (
-    <group position={[0, 0.8, 0]}>
+    <group position={[0, -0.3, 0]}>
       {/* Main terrain layers */}
       <TerrainLayer height={-0.6} radius={5} color="#8D6E63" />{" "}
       {/* Base rock */}

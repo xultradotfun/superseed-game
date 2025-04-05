@@ -11,6 +11,7 @@ const WaterMaterial = shaderMaterial(
     uTime: 0,
     uColor: new THREE.Color("#2196F3"),
     uFoamColor: new THREE.Color("#E3F2FD"),
+    uShallowColor: new THREE.Color("#4FC3F7"),
     uBigWavesElevation: 0.2,
     uBigWavesFrequency: new THREE.Vector2(3, 1.5),
     uBigWaveSpeed: 0.5,
@@ -34,14 +35,22 @@ const WaterMaterial = shaderMaterial(
     varying vec3 vPosition;
     varying vec3 vNormal;
     varying float vElevation;
+    varying float vDistance;
 
     void main() {
       vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+      
+      // Calculate distance from center for shallow water effect
+      vDistance = length(position.xz) * 0.05;
       
       // Big waves
       float elevation = sin(modelPosition.x * uBigWavesFrequency.x + uTime * uBigWaveSpeed) *
                        sin(modelPosition.z * uBigWavesFrequency.y + uTime * uBigWaveSpeed) *
                        uBigWavesElevation;
+
+      // Reduce wave height near the island
+      float islandMask = smoothstep(0.0, 5.0, vDistance);
+      elevation *= islandMask;
 
       // Small waves
       for(float i = 1.0; i <= uSmallWavesIterations; i++) {
@@ -73,11 +82,13 @@ const WaterMaterial = shaderMaterial(
   `
     uniform vec3 uColor;
     uniform vec3 uFoamColor;
+    uniform vec3 uShallowColor;
     uniform vec3 uLightPos;
     
     varying vec3 vPosition;
     varying vec3 vNormal;
     varying float vElevation;
+    varying float vDistance;
     
     void main() {
       // Basic lighting
@@ -93,11 +104,17 @@ const WaterMaterial = shaderMaterial(
       // Wave height based foam
       float foam = smoothstep(-0.05, 0.1, vElevation);
       
+      // Blend between shallow and deep water based on distance from center
+      vec3 waterColor = mix(uShallowColor, uColor, vDistance);
+      
       // Final color
-      vec3 diffuseColor = mix(uColor, uFoamColor, foam * 0.5);
+      vec3 diffuseColor = mix(waterColor, uFoamColor, foam * 0.5);
       vec3 finalColor = diffuseColor * (0.3 + diff * 0.7) + spec * uFoamColor * 0.5;
       
-      gl_FragColor = vec4(finalColor, 0.9);
+      // Increase opacity near the island
+      float alpha = mix(0.95, 0.85, smoothstep(0.0, 0.2, vDistance));
+      
+      gl_FragColor = vec4(finalColor, alpha);
     }
   `
 );
@@ -138,7 +155,7 @@ export function Water() {
     <mesh
       ref={waterRef}
       rotation-x={-Math.PI / 2}
-      position={[0, -0.8, 0]}
+      position={[0, -0.5, 0]}
       receiveShadow
     >
       <primitive object={geometry} attach="geometry" />
