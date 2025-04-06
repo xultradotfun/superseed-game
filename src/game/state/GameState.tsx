@@ -361,6 +361,37 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Add this new function to check achievements when plants reach full growth
+  const checkPlantGrowthAchievements = () => {
+    const fullGrownPlants = Object.values(plants).filter(
+      (p) => p.growthStage >= 1
+    ).length;
+
+    setGameProgress((prev) => {
+      const updatedAchievements = prev.achievements.map((achievement) => {
+        if (achievement.id === "efficient_gardener" && !achievement.completed) {
+          const isNowCompleted = fullGrownPlants >= achievement.maxProgress;
+          if (isNowCompleted) {
+            console.log("Efficient Gardener achievement completed!");
+            soundSystem.play("ui", "success");
+          }
+          return {
+            ...achievement,
+            progress: fullGrownPlants,
+            completed: isNowCompleted,
+          };
+        }
+        return achievement;
+      });
+
+      return {
+        ...prev,
+        achievements: updatedAchievements,
+      };
+    });
+  };
+
+  // Modify the harvestPlant function to remove efficient_gardener check
   const harvestPlant = async (id: string) => {
     const plant = plants[id];
     if (plant && plant.growthStage >= 1) {
@@ -380,9 +411,6 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
       };
 
       const masteryAchievementId = achievementMap[plant.type];
-      const fullGrownPlants = Object.values(plants).filter(
-        (p) => p.growthStage >= 1
-      ).length;
       const totalSeeds =
         Object.values(gameProgress.plantMasteries).reduce(
           (total, mastery) => total + mastery.seedsCollected,
@@ -402,12 +430,6 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
             };
           } else if (achievement.id === "grow_first_plant") {
             return { ...achievement, progress: 1, completed: true };
-          } else if (achievement.id === "efficient_gardener") {
-            return {
-              ...achievement,
-              progress: fullGrownPlants,
-              completed: fullGrownPlants >= achievement.maxProgress,
-            };
           } else if (achievement.id === "seed_collector") {
             return {
               ...achievement,
@@ -501,6 +523,28 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
         soundSystem.play("ui", "success");
       }
     }
+  };
+
+  const updatePlant = (id: string, updates: Partial<Plant>) => {
+    setPlants((prev) => {
+      const plant = prev[id];
+      if (!plant) return prev;
+
+      const wasFullyGrown = plant.growthStage >= 1;
+      const newPlant = { ...plant, ...updates };
+      const isNowFullyGrown = newPlant.growthStage >= 1;
+
+      // Check for newly fully grown plant
+      if (!wasFullyGrown && isNowFullyGrown) {
+        console.log("Plant reached full growth!");
+        checkPlantGrowthAchievements();
+      }
+
+      return {
+        ...prev,
+        [id]: newPlant,
+      };
+    });
   };
 
   return (
