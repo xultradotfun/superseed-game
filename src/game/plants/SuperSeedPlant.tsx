@@ -55,20 +55,22 @@ export function SuperSeedPlant(props: SuperSeedProps) {
           }
 
           showVictoryModal({
-            title: "The Sacred SuperSeed Has Bloomed!",
+            title: "🌱 SuperSeed Prophecy Fulfilled! 🌟",
             message:
-              "You have successfully grown the legendary SuperSeed! Its ethereal beauty illuminates the garden with ancient wisdom.",
+              "Congratulations, brave gardener! You've discovered and grown the legendary SuperSeed - a mystical plant inspired by Superseed, the first blockchain that repays your debt.\n\n" +
+              "Through your mastery of the garden's ethereal plants, you've unlocked the secrets of Supercollateral: a revolutionary system of self-repaying loans powered by Proof of Repayment.\n\n" +
+              "Your SuperSeedjourney has only begun...",
             links: [
               {
-                text: "Share Your Achievement",
-                url: "https://twitter.com/intent/tweet?text=I've grown the legendary SuperSeed in my ethereal garden! 🌱✨",
-                description: "Share your gardening achievement with the world",
+                text: "🌐 Explore Superseed Mainnet",
+                url: "https://superseed.xyz",
+                description:
+                  "Discover self-repaying loans and join the future of DeFi",
               },
               {
-                text: "Learn More About Web3 Gardens",
-                url: "https://ethereum.org/en/learn/",
-                description:
-                  "Explore the world of Web3 and blockchain technology",
+                text: "𝕏 Follow 0x_ultra",
+                url: "https://twitter.com/0x_ultra",
+                description: "Follow the creator on X",
               },
             ],
           });
