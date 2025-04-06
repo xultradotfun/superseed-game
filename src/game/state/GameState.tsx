@@ -49,6 +49,22 @@ type Inventory = {
   [K in PlantType]: number;
 };
 
+// Update shop configuration
+const SEED_SHOP_CONFIG = {
+  EthereumEssence: {
+    cost: { type: "LuminaBloom" as PlantType, amount: 25 },
+    requiredSeeds: 15, // Number of Lumina seeds needed to unlock
+  },
+  OPStackOrchid: {
+    cost: { type: "EthereumEssence" as PlantType, amount: 20 },
+    requiredMastery: "master_ethereum", // Achievement ID required
+  },
+  DeFiDandelion: {
+    cost: { type: "OPStackOrchid" as PlantType, amount: 15 },
+    requiredMastery: "master_opstack", // Achievement ID required
+  },
+};
+
 // Track overall game progression
 type GameProgress = {
   plantMasteries: Record<PlantType, PlantMastery>;
@@ -59,6 +75,7 @@ type GameProgress = {
     unlockedCombinations: string[];
     completedRituals: string[];
   };
+  unlockedSeeds: PlantType[]; // Track which seeds are available in the shop
 };
 
 const INITIAL_ACHIEVEMENTS: Achievement[] = [
@@ -164,6 +181,8 @@ type GameState = {
   handlePlanting: (position: Vector3) => void;
   harvestPlant: (plantId: string) => void;
   gameProgress: GameProgress;
+  canPurchaseSeed: (type: PlantType) => boolean;
+  purchaseSeed: (type: PlantType) => boolean;
 };
 
 const GameStateContext = createContext<GameState | null>(null);
@@ -172,9 +191,9 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
   const [plants, setPlants] = useState<Plants>({});
   const [inventory, setInventory] = useState<Inventory>({
     LuminaBloom: 5,
-    EthereumEssence: 3,
-    OPStackOrchid: 2,
-    DeFiDandelion: 1,
+    EthereumEssence: 0,
+    OPStackOrchid: 0,
+    DeFiDandelion: 0,
   });
   const [selectedPlantType, setSelectedPlantType] = useState<PlantType | null>(
     null
@@ -193,6 +212,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
       unlockedCombinations: [],
       completedRituals: [],
     },
+    unlockedSeeds: ["LuminaBloom"], // Start with only Lumina Bloom
   });
 
   useEffect(() => {
@@ -419,8 +439,19 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
       });
 
       soundSystem.play("effects", "harvest");
+
+      // Check for new seed unlocks after harvesting
+      checkSeedUnlocks();
     }
   };
+
+  // Add effect to check seed unlocks when mastery changes
+  useEffect(() => {
+    checkSeedUnlocks();
+  }, [
+    gameProgress.plantMasteries.LuminaBloom.plantsGrown,
+    gameProgress.achievements,
+  ]);
 
   const handlePlanting = (position: Vector3) => {
     if (selectedPlantType && canPlantAt(position, plants)) {
@@ -436,6 +467,84 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Add shop functions
+  const canPurchaseSeed = (type: PlantType): boolean => {
+    if (type === "LuminaBloom") return false; // Can't purchase starter seeds
+
+    const config = SEED_SHOP_CONFIG[type as keyof typeof SEED_SHOP_CONFIG];
+    if (!config) return false;
+
+    // For Ethereum Essence, just check if we have enough seeds
+    if (type === "EthereumEssence") {
+      return inventory[config.cost.type] >= config.cost.amount;
+    }
+
+    // For other seeds, check if we have the achievement and enough seeds
+    if (gameProgress.unlockedSeeds.includes(type)) {
+      return inventory[config.cost.type] >= config.cost.amount;
+    }
+
+    return false;
+  };
+
+  const checkSeedUnlocks = () => {
+    const newUnlocks: PlantType[] = ["LuminaBloom"];
+
+    // Check Ethereum Essence unlock - available when you have enough Lumina seeds
+    if (
+      inventory.LuminaBloom >= SEED_SHOP_CONFIG.EthereumEssence.requiredSeeds
+    ) {
+      newUnlocks.push("EthereumEssence");
+    }
+
+    // Check OP Stack Orchid unlock
+    const ethereumMastery = gameProgress.achievements.find(
+      (a) => a.id === SEED_SHOP_CONFIG.OPStackOrchid.requiredMastery
+    );
+    if (ethereumMastery?.completed) {
+      newUnlocks.push("OPStackOrchid");
+    }
+
+    // Check DeFi Dandelion unlock
+    const opStackMastery = gameProgress.achievements.find(
+      (a) => a.id === SEED_SHOP_CONFIG.DeFiDandelion.requiredMastery
+    );
+    if (opStackMastery?.completed) {
+      newUnlocks.push("DeFiDandelion");
+    }
+
+    if (
+      JSON.stringify(newUnlocks) !== JSON.stringify(gameProgress.unlockedSeeds)
+    ) {
+      setGameProgress((prev) => ({
+        ...prev,
+        unlockedSeeds: newUnlocks,
+      }));
+      soundSystem.play("ui", "success");
+    }
+  };
+
+  // Add effect to check seed unlocks when inventory changes
+  useEffect(() => {
+    checkSeedUnlocks();
+  }, [inventory.LuminaBloom]);
+
+  const purchaseSeed = (type: PlantType) => {
+    if (!canPurchaseSeed(type)) return false;
+
+    const config = SEED_SHOP_CONFIG[type as keyof typeof SEED_SHOP_CONFIG];
+    if (!config) return false;
+
+    setInventory((prev) => ({
+      ...prev,
+      [config.cost.type]: prev[config.cost.type] - config.cost.amount,
+      [type]: prev[type] + 1,
+    }));
+
+    soundSystem.play("ui", "success");
+    return true;
+  };
+
   return (
     <GameStateContext.Provider
       value={{
@@ -448,6 +557,8 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
         handlePlanting,
         harvestPlant,
         gameProgress,
+        canPurchaseSeed,
+        purchaseSeed,
       }}
     >
       {children}

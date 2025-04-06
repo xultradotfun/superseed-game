@@ -74,6 +74,44 @@ The Sacred Superseed is a relaxing 3D garden cultivation game where players nurt
 - **Plant Diary**: Records discovered species and combinations
 - **Seed Storage**: Organize and store collected seeds
 - **Achievement System**: Rewards for plant mastery and discoveries
+- **Seed Shop**: Exchange harvested seeds for rarer varieties
+
+### Shop System
+
+The garden's mystical shop allows players to exchange common seeds for rarer varieties:
+
+#### Seed Exchange Rates
+
+1. **Ethereum Essence Seed**
+
+   - Cost: 25 Lumina Bloom seeds
+   - Unlocks after growing 15 Lumina Blooms
+   - Introduces player to energy-based plants
+
+2. **OP Stack Orchid Seed**
+
+   - Cost: 20 Ethereum Essence seeds
+   - Unlocks after mastering Ethereum Essence (10 perfect growths)
+   - Opens up advanced cultivation techniques
+
+3. **DeFi Dandelion Seed**
+
+   - Cost: 15 OP Stack Orchid seeds
+   - Unlocks after mastering OP Stack Orchid (10 perfect growths)
+   - Reveals final tier of magical plants
+
+4. **The Sacred Superseed**
+   - Unlocks after collecting all prophecy pieces
+   - Cannot be purchased - awarded as final achievement
+   - Represents mastery of all plant types
+
+#### Shop Features
+
+- Visual preview of locked/unlocked seeds
+- Progress tracking toward unlocking new varieties
+- Automatic seed conversion when requirements are met
+- Special effects when new seeds become available
+- Detailed information about each seed type and its requirements
 
 ### Achievement System
 
