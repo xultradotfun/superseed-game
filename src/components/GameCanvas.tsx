@@ -13,6 +13,7 @@ import { LuminaBloom } from "@/game/plants/LuminaBloom";
 import { EthereumEssence } from "@/game/plants/EthereumEssence";
 import { OPStackOrchid } from "@/game/plants/OPStackOrchid";
 import { DeFiDandelion } from "@/game/plants/DeFiDandelion";
+import { SuperSeedPlant } from "@/game/plants/SuperSeedPlant";
 import { SceneLighting } from "@/game/environment/SceneLighting";
 import { Sky } from "@/game/environment/Sky";
 import { useGameState, Plant } from "@/game/state/GameState";
@@ -54,6 +55,15 @@ export function GameCanvas() {
       case "DeFiDandelion":
         return (
           <DeFiDandelion
+            key={plant.id}
+            id={plant.id}
+            position={position}
+            growthStage={plant.growthStage}
+          />
+        );
+      case "SuperSeed":
+        return (
+          <SuperSeedPlant
             key={plant.id}
             id={plant.id}
             position={position}

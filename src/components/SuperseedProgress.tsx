@@ -7,7 +7,7 @@ import Image from "next/image";
 type Tab = "prophecy" | "achievements" | "mastery";
 
 export function SuperseedProgress() {
-  const { gameProgress } = useGameState();
+  const { gameProgress, canClaimSuperSeed, claimSuperSeed } = useGameState();
   const { superseedProgress, achievements, plantMasteries } = gameProgress;
   const [activeTab, setActiveTab] = useState<Tab>("prophecy");
 
@@ -245,6 +245,38 @@ export function SuperseedProgress() {
           </div>
         )}
       </div>
+
+      {/* Add SuperSeed claim section when all pieces are found */}
+      {superseedProgress.prophecyPiecesFound ===
+        superseedProgress.totalPieces && (
+        <div className="p-4 border-t border-cyan-500/20">
+          <div className="text-center">
+            {canClaimSuperSeed() ? (
+              <>
+                <div className="mb-4">
+                  <div className="text-lg font-medium text-cyan-100 mb-2">
+                    🎉 Sacred SuperSeed Unlocked! 🎉
+                  </div>
+                  <div className="text-sm text-cyan-300/60">
+                    You have collected all prophecy pieces and unlocked the
+                    legendary Sacred SuperSeed!
+                  </div>
+                </div>
+                <button
+                  onClick={claimSuperSeed}
+                  className="w-full bg-gradient-to-r from-cyan-500 to-cyan-400 hover:from-cyan-400 hover:to-cyan-300 text-black font-medium py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/25"
+                >
+                  Claim Sacred SuperSeed
+                </button>
+              </>
+            ) : (
+              <div className="text-sm text-cyan-300/60">
+                You have already claimed the Sacred SuperSeed.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

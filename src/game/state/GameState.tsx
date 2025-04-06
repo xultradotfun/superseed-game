@@ -14,7 +14,8 @@ export type PlantType =
   | "LuminaBloom"
   | "EthereumEssence"
   | "OPStackOrchid"
-  | "DeFiDandelion";
+  | "DeFiDandelion"
+  | "SuperSeed";
 
 // Achievement tracking
 export type Achievement = {
@@ -171,7 +172,19 @@ const canPlantAt = (position: Vector3, plants: Plants) => {
   });
 };
 
-type GameState = {
+interface VictoryLink {
+  text: string;
+  url: string;
+  description: string;
+}
+
+interface VictoryModalProps {
+  title: string;
+  message: string;
+  links: VictoryLink[];
+}
+
+export interface GameState {
   plants: Plants;
   inventory: Inventory;
   selectedPlantType: PlantType | null;
@@ -183,7 +196,10 @@ type GameState = {
   gameProgress: GameProgress;
   canPurchaseSeed: (type: PlantType) => boolean;
   purchaseSeed: (type: PlantType) => boolean;
-};
+  canClaimSuperSeed: () => boolean;
+  claimSuperSeed: () => boolean;
+  showVictoryModal: (props: VictoryModalProps) => void;
+}
 
 const GameStateContext = createContext<GameState | null>(null);
 
@@ -194,6 +210,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     EthereumEssence: 0,
     OPStackOrchid: 0,
     DeFiDandelion: 0,
+    SuperSeed: 1,
   });
   const [selectedPlantType, setSelectedPlantType] = useState<PlantType | null>(
     null
@@ -204,6 +221,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
       EthereumEssence: { ...INITIAL_PLANT_MASTERY },
       OPStackOrchid: { ...INITIAL_PLANT_MASTERY },
       DeFiDandelion: { ...INITIAL_PLANT_MASTERY },
+      SuperSeed: { ...INITIAL_PLANT_MASTERY },
     },
     achievements: INITIAL_ACHIEVEMENTS,
     superseedProgress: {
@@ -548,22 +566,67 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     return true;
   };
 
+  // Add function to check if SuperSeed can be claimed
+  const canClaimSuperSeed = (): boolean => {
+    return (
+      gameProgress.superseedProgress.prophecyPiecesFound ===
+        gameProgress.superseedProgress.totalPieces &&
+      !gameProgress.superseedProgress.completedRituals.includes(
+        "claimed_superseed"
+      )
+    );
+  };
+
+  // Add function to claim SuperSeed
+  const claimSuperSeed = () => {
+    if (!canClaimSuperSeed()) return false;
+
+    setInventory((prev) => ({
+      ...prev,
+      SuperSeed: prev.SuperSeed + 1,
+    }));
+
+    setGameProgress((prev) => ({
+      ...prev,
+      superseedProgress: {
+        ...prev.superseedProgress,
+        completedRituals: [
+          ...prev.superseedProgress.completedRituals,
+          "claimed_superseed",
+        ],
+      },
+    }));
+
+    soundSystem.play("ui", "success");
+    return true;
+  };
+
+  const showVictoryModal = (props: VictoryModalProps) => {
+    // We'll implement the actual modal in the UI layer
+    window.dispatchEvent(
+      new CustomEvent("showVictoryModal", { detail: props })
+    );
+  };
+
+  const value = {
+    plants,
+    inventory,
+    selectedPlantType,
+    setSelectedPlantType,
+    addPlant,
+    waterPlant,
+    handlePlanting,
+    harvestPlant,
+    gameProgress,
+    canPurchaseSeed,
+    purchaseSeed,
+    canClaimSuperSeed,
+    claimSuperSeed,
+    showVictoryModal,
+  };
+
   return (
-    <GameStateContext.Provider
-      value={{
-        plants,
-        inventory,
-        selectedPlantType,
-        setSelectedPlantType,
-        addPlant,
-        waterPlant,
-        handlePlanting,
-        harvestPlant,
-        gameProgress,
-        canPurchaseSeed,
-        purchaseSeed,
-      }}
-    >
+    <GameStateContext.Provider value={value}>
       {children}
     </GameStateContext.Provider>
   );

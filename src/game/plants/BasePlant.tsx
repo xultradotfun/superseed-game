@@ -21,6 +21,7 @@ export type BasePlantProps = {
     };
     glowIntensity?: number;
     hitboxSize?: number;
+    disableHarvest?: boolean;
   };
   renderPlantModel: (props: {
     plantRef: React.RefObject<Group | null>;
@@ -123,8 +124,8 @@ export function BasePlant({
         </mesh>
       )}
 
-      {/* Growth completion indicator */}
-      {growthStage >= 1 && (
+      {/* Growth completion indicator - only show if harvesting is enabled */}
+      {growthStage >= 1 && !config.disableHarvest && (
         <>
           {/* Wheat emoji chat bubble */}
           <Html

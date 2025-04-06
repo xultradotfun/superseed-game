@@ -5,11 +5,12 @@ import { useGameState, PlantType } from "@/game/state/GameState";
 import { FaSeedling, FaTimes } from "react-icons/fa";
 import { HiSparkles } from "react-icons/hi";
 import { Shop } from "./Shop";
+import Image from "next/image";
 
 // Import SEED_DETAILS from Shop
 const SEED_DETAILS: Record<
   Exclude<PlantType, "LuminaBloom">,
-  { emoji: string }
+  { emoji: string; isImage?: boolean }
 > = {
   EthereumEssence: {
     emoji: "💠",
@@ -20,10 +21,14 @@ const SEED_DETAILS: Record<
   DeFiDandelion: {
     emoji: "✨",
   },
+  SuperSeed: {
+    emoji: "/superlogo.png",
+    isImage: true,
+  },
 };
 
 export function GameMenu() {
-  const [isInventoryOpen, setIsInventoryOpen] = useState(false);
+  const [isInventoryOpen, setIsInventoryOpen] = useState(true);
   const [isShopOpen, setIsShopOpen] = useState(false);
   const { inventory, selectedPlantType, setSelectedPlantType } = useGameState();
 
@@ -41,9 +46,25 @@ export function GameMenu() {
     }
   };
 
-  const getPlantEmoji = (type: PlantType) => {
-    if (type === "LuminaBloom") return "🌟";
-    return SEED_DETAILS[type].emoji;
+  const renderSeedIcon = (type: PlantType) => {
+    if (type === "LuminaBloom")
+      return <span className="text-2xl filter drop-shadow-lg">🌟</span>;
+
+    const details = SEED_DETAILS[type];
+    if (details.isImage) {
+      return (
+        <Image
+          src={details.emoji}
+          alt={`${type} icon`}
+          width={32}
+          height={32}
+          className="opacity-90"
+        />
+      );
+    }
+    return (
+      <span className="text-2xl filter drop-shadow-lg">{details.emoji}</span>
+    );
   };
 
   return (
@@ -112,9 +133,7 @@ export function GameMenu() {
                             : "bg-slate-900/50 border border-white/10"
                         }`}
                       >
-                        <span className="text-2xl filter drop-shadow-lg">
-                          {getPlantEmoji(type as PlantType)}
-                        </span>
+                        {renderSeedIcon(type as PlantType)}
                       </div>
                       <div className="flex-1 flex items-center justify-between">
                         <span className="font-medium text-base text-cyan-100">
@@ -191,9 +210,7 @@ export function GameMenu() {
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-cyan-400/5 border border-cyan-400/20 flex items-center justify-center">
-                    <span className="text-2xl">
-                      {getPlantEmoji(selectedPlantType)}
-                    </span>
+                    {renderSeedIcon(selectedPlantType)}
                   </div>
                   <span className="font-medium text-cyan-100">
                     {selectedPlantType}
