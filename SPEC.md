@@ -75,6 +75,89 @@ The Sacred Superseed is a relaxing 3D garden cultivation game where players nurt
 - **Seed Storage**: Organize and store collected seeds
 - **Achievement System**: Rewards for plant mastery and discoveries
 
+### Achievement System
+
+#### Core Achievements
+
+1. **First Steps**
+
+   - Description: Grow your first plant to completion
+   - Progress: 0/1
+   - Reward: Basic achievement
+
+2. **Efficient Gardener**
+
+   - Description: Maintain 3 plants simultaneously at full growth
+   - Progress: 0/3
+   - Reward: Basic achievement
+   - Note: Achievement persists once completed, even after harvesting plants
+
+3. **Seed Collector**
+   - Description: Collect 50 seeds in total
+   - Progress: 0/50
+   - Reward: Basic achievement
+
+#### Plant Mastery Achievements
+
+Each plant type has its own mastery achievement that unlocks a prophecy piece:
+
+1. **Lumina Master** (Prophecy Piece 1)
+
+   - Description: Master the Lumina Bloom by growing 10 perfect specimens
+   - Progress: 0/10
+   - Reward: First prophecy piece
+
+2. **Ethereum Essence Expert** (Prophecy Piece 2)
+
+   - Description: Master the Ethereum Essence by growing 10 perfect specimens
+   - Progress: 0/10
+   - Reward: Second prophecy piece
+
+3. **OP Stack Oracle** (Prophecy Piece 3)
+
+   - Description: Master the OP Stack Orchid by growing 10 perfect specimens
+   - Progress: 0/10
+   - Reward: Third prophecy piece
+
+4. **DeFi Sage** (Prophecy Piece 4)
+   - Description: Master the DeFi Dandelion by growing 10 perfect specimens
+   - Progress: 0/10
+   - Reward: Fourth prophecy piece
+
+### Plant Mastery System
+
+Each plant type tracks:
+
+- Total plants grown
+- Perfect growths achieved
+- Seeds collected
+- Times cared for
+
+Perfect growth is achieved when:
+
+- Plant reaches full growth stage (100%)
+- Plant is properly maintained throughout growth cycle
+
+### The Sacred Superseed Quest
+
+The legendary Superseed can only be discovered by collecting all four prophecy pieces:
+
+1. Each piece is unlocked by mastering a specific plant type
+2. Progress is tracked in the prophecy tab
+3. Collecting all pieces triggers the final revelation ceremony
+4. Special visual and sound effects mark prophecy piece discoveries
+
+### Achievement UI
+
+The achievement system features:
+
+- Tabbed interface with Prophecy, Achievements, and Mastery sections
+- Visual indicators for locked/unlocked achievements
+- Progress bars for all trackable elements
+- Special effects for achievement completion
+- Persistent progress tracking
+- Detailed statistics for each plant type
+
 ### Special Events
 
 - **Meteor Showers**: Rare seeds fall from the sky
