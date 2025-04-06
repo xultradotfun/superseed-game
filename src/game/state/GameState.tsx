@@ -199,6 +199,7 @@ export interface GameState {
   canClaimSuperSeed: () => boolean;
   claimSuperSeed: () => boolean;
   showVictoryModal: (props: VictoryModalProps) => void;
+  showIntroModal: () => void;
 }
 
 const GameStateContext = createContext<GameState | null>(null);
@@ -210,7 +211,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     EthereumEssence: 0,
     OPStackOrchid: 0,
     DeFiDandelion: 0,
-    SuperSeed: 1,
+    SuperSeed: 0,
   });
   const [selectedPlantType, setSelectedPlantType] = useState<PlantType | null>(
     null
@@ -236,6 +237,11 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     soundSystem.startAmbientMusic();
     return () => soundSystem.stopMusic();
+  }, []);
+
+  // Show intro modal when game starts
+  useEffect(() => {
+    showIntroModal();
   }, []);
 
   const addPlant = (position: Vector3, type: PlantType) => {
@@ -614,6 +620,10 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const showIntroModal = () => {
+    window.dispatchEvent(new CustomEvent("showIntroModal", {}));
+  };
+
   const value = {
     plants,
     inventory,
@@ -629,6 +639,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     canClaimSuperSeed,
     claimSuperSeed,
     showVictoryModal,
+    showIntroModal,
   };
 
   return (

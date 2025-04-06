@@ -1,7 +1,8 @@
 - animations
-- modal game start
 - modal teach seed unlock
 - placement indicator
 - little humans
 - plane easter egg
 - different sounds across UI
+- update README
+- if come from mobile say cant play

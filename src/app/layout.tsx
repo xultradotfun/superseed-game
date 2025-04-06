@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { VictoryModal } from "@/components/VictoryModal";
+import { IntroModal } from "@/components/IntroModal";
 import { GameStateProvider } from "@/game/state/GameState";
 
 const geistSans = Geist({
@@ -32,6 +33,7 @@ export default function RootLayout({
         <GameStateProvider>
           {children}
           <VictoryModal />
+          <IntroModal />
         </GameStateProvider>
       </body>
     </html>
