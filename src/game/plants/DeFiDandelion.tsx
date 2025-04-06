@@ -32,17 +32,6 @@ export function DeFiDandelion(props: DeFiDandelionProps) {
       config={config}
       renderPlantModel={({ hoveredPlantId, id, growthStage }) => (
         <>
-          {/* Spore particles */}
-          <ParticleSystem
-            position={[0, 0.3, 0]}
-            color={config.colors.primary}
-            count={10}
-            spread={0.8}
-            lifetime={3}
-            size={0.02}
-            active={isReleasing && growthStage > 0.5 && hoveredPlantId === id}
-          />
-
           <group>
             {/* Seed head */}
             <mesh>

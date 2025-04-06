@@ -7,7 +7,6 @@ import { Html } from "@react-three/drei";
 import { ParticleSystem } from "@/game/effects/ParticleSystem";
 import { usePlantInteraction } from "./PlantInteraction";
 import { useGameState } from "@/game/state/GameState";
-import { soundSystem } from "@/game/audio/SoundSystem";
 
 export type BasePlantProps = {
   id: string;
@@ -90,7 +89,6 @@ export function BasePlant({
     if (growthStage >= 1) {
       console.log("Calling harvestPlant with id:", id);
       harvestPlant(id);
-      soundSystem.play("effects", "harvest");
     } else {
       console.log("Plant not ready for harvest, growth stage:", growthStage);
     }

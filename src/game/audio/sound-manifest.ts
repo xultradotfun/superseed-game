@@ -7,6 +7,7 @@ export const SOUND_MANIFEST = {
     "water-drop": "/sounds/effects/water-drop.mp3",
     grow: "/sounds/effects/grow.mp3",
     harvest: "/sounds/effects/harvest.mp3",
+    "fully-grown": "/sounds/effects/fully-grown.mp3",
   },
   ui: {
     click: "/sounds/ui/click.mp3",

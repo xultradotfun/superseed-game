@@ -91,15 +91,28 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
   };
 
   const waterPlant = (id: string) => {
+    const currentPlant = plants[id];
+    if (!currentPlant) return;
+
+    const currentGrowthStage = currentPlant.growthStage || 0;
+    const newGrowthStage = Math.min(1, currentGrowthStage + 0.2);
+
     setPlants((prev) => ({
       ...prev,
       [id]: {
         ...prev[id],
         lastWatered: Date.now(),
-        growthStage: Math.min(1, (prev[id]?.growthStage || 0) + 0.2),
+        growthStage: newGrowthStage,
       },
     }));
+
+    // Play water drop sound
     soundSystem.play("effects", "water-drop");
+
+    // If the plant just reached full growth, play the fully grown sound
+    if (newGrowthStage >= 1 && currentGrowthStage < 1) {
+      soundSystem.play("effects", "fully-grown");
+    }
   };
 
   const harvestPlant = (id: string) => {
