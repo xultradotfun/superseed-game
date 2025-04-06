@@ -14,7 +14,10 @@ type SeedDetails = {
   unlockRequirement: string;
 };
 
-const SEED_DETAILS: Record<Exclude<PlantType, "LuminaBloom">, SeedDetails> = {
+const SEED_DETAILS: Record<
+  Exclude<PlantType, "LuminaBloom" | "SuperSeed">,
+  SeedDetails
+> = {
   EthereumEssence: {
     emoji: "💠",
     description: "A mystical plant with geometric patterns",
@@ -44,7 +47,9 @@ export function Shop({ isOpen, onToggle }: ShopProps) {
   const { gameProgress, purchaseSeed, inventory, canPurchaseSeed } =
     useGameState();
 
-  const getItemState = (type: Exclude<PlantType, "LuminaBloom">) => {
+  const getItemState = (
+    type: Exclude<PlantType, "LuminaBloom" | "SuperSeed">
+  ) => {
     const details = SEED_DETAILS[type];
     const isUnlocked =
       type === "EthereumEssence"
@@ -90,7 +95,7 @@ export function Shop({ isOpen, onToggle }: ShopProps) {
           <div className="p-4 space-y-3">
             {(
               Object.entries(SEED_DETAILS) as [
-                Exclude<PlantType, "LuminaBloom">,
+                Exclude<PlantType, "LuminaBloom" | "SuperSeed">,
                 SeedDetails
               ][]
             ).map(([type, details]) => {
@@ -157,9 +162,9 @@ export function Shop({ isOpen, onToggle }: ShopProps) {
                               : SEED_DETAILS[
                                   details.cost.type as Exclude<
                                     PlantType,
-                                    "LuminaBloom"
+                                    "LuminaBloom" | "SuperSeed"
                                   >
-                                ].emoji}
+                                ]?.emoji}
                           </span>
                           <span className="text-xs font-medium text-cyan-100 whitespace-nowrap">
                             {details.cost.amount} {details.cost.type}

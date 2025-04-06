@@ -210,7 +210,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     EthereumEssence: 0,
     OPStackOrchid: 0,
     DeFiDandelion: 0,
-    SuperSeed: 1,
+    SuperSeed: 0,
   });
   const [selectedPlantType, setSelectedPlantType] = useState<PlantType | null>(
     null
