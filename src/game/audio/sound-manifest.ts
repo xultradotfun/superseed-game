@@ -17,6 +17,7 @@ export const SOUND_MANIFEST = {
 } as const;
 
 export type SoundCategory = keyof typeof SOUND_MANIFEST;
-export type SoundType = {
-  [K in SoundCategory]: keyof (typeof SOUND_MANIFEST)[K];
-}[SoundCategory];
+export type SoundType =
+  | keyof (typeof SOUND_MANIFEST)["music"]
+  | keyof (typeof SOUND_MANIFEST)["effects"]
+  | keyof (typeof SOUND_MANIFEST)["ui"];

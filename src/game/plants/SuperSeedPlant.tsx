@@ -29,126 +29,84 @@ type SuperSeedProps = Omit<BasePlantProps, "config" | "renderPlantModel">;
 
 export function SuperSeedPlant(props: SuperSeedProps) {
   const energyRingsRef = useRef<Group>(null);
-  const { camera } = useThree();
   const { showVictoryModal } = useGameState();
-  const hasShownVictory = useRef(false);
+  const { camera, controls } = useThree();
   const growthStage = props.growthStage ?? 0;
-  const spinningAnimationRef = useRef<gsap.core.Timeline | null>(null);
-  const controls = useThree((state) => state.controls);
 
+  // Victory celebration effect
   useEffect(() => {
-    if (growthStage >= 1 && !hasShownVictory.current) {
-      hasShownVictory.current = true;
-
-      // Store original camera position and rotation
-      const originalPosition = { ...camera.position };
-      const originalRotation = { ...camera.rotation };
+    if (growthStage >= 1) {
+      const baseHeight = 0.4 + growthStage * 2.0;
+      const beamHeight = baseHeight * 1.5;
+      const scale = 2.0;
+      const totalHeight = beamHeight * scale;
 
       // Disable orbit controls
       if (controls) {
-        controls.enabled = false;
+        (controls as unknown as { enabled: boolean }).enabled = false;
       }
 
-      // Set up camera for victory animation
-      const distance = 60; // Doubled distance from center
-      const height = 40; // Doubled height above ground
+      // Create a master timeline
+      const masterTimeline = gsap.timeline({
+        onComplete: () => {
+          // Re-enable orbit controls
+          if (controls) {
+            (controls as unknown as { enabled: boolean }).enabled = true;
+          }
 
-      // Move camera to starting position
-      gsap.set(camera.position, {
-        x: 0,
-        y: height,
-        z: distance,
+          showVictoryModal({
+            title: "The Sacred SuperSeed Has Bloomed!",
+            message:
+              "You have successfully grown the legendary SuperSeed! Its ethereal beauty illuminates the garden with ancient wisdom.",
+            links: [
+              {
+                text: "Share Your Achievement",
+                url: "https://twitter.com/intent/tweet?text=I've grown the legendary SuperSeed in my ethereal garden! 🌱✨",
+                description: "Share your gardening achievement with the world",
+              },
+              {
+                text: "Learn More About Web3 Gardens",
+                url: "https://ethereum.org/en/learn/",
+                description:
+                  "Explore the world of Web3 and blockchain technology",
+              },
+            ],
+          });
+        },
       });
-      camera.lookAt(0, 0, 0);
 
-      // Create the orbit animation
-      const timeline = gsap.timeline({ repeat: -1 });
-      timeline.to(
-        {},
-        {
-          duration: 20,
-          ease: "none",
-          onUpdate: function () {
-            const progress = this.progress();
-            const angle = progress * Math.PI * 2;
+      // Camera movement
+      masterTimeline.to(camera.position, {
+        y: totalHeight * 3,
+        z: totalHeight * 4,
+        duration: 2,
+        ease: "power2.inOut",
+      });
 
-            // Calculate camera position on the orbit circle
-            camera.position.x = Math.sin(angle) * distance;
-            camera.position.z = Math.cos(angle) * distance;
-            camera.position.y = height;
+      // Add continuous spinning animation
+      const spinAnimation = gsap.to(camera.position, {
+        duration: 8,
+        repeat: -1,
+        onUpdate: () => {
+          const time = Date.now() * 0.001;
+          const radius = totalHeight * 4;
+          camera.position.x = Math.sin(time * 0.5) * radius;
+          camera.position.z = Math.cos(time * 0.5) * radius;
+          camera.lookAt(0, totalHeight * 0.8, 0);
+        },
+      });
 
-            // Look at the center
-            camera.lookAt(0, 0, 0);
-          },
-        }
-      );
-
-      spinningAnimationRef.current = timeline;
-
-      // Show victory modal after a short delay
-      setTimeout(() => {
-        showVictoryModal({
-          title: "🎉 Sacred SuperSeed Achieved!",
-          message:
-            "You have discovered and grown the Sacred SuperSeed - a symbol of growth and innovation in the blockchain ecosystem. This mystical flower represents the pinnacle of achievement, inspired by Superseed: the first blockchain that repays your debt.",
-          links: [
-            {
-              text: "🌱 Explore Superseed - The Future of DeFi",
-              url: "https://www.superseed.xyz/",
-              description:
-                "Discover Supercollateral: self-repaying loans powered by Proof of Repayment (PoR). Join a culture of contribution and help expand Ethereum's frontier.",
-            },
-            {
-              text: "𝕏 Made by 0x_ultra",
-              url: "https://twitter.com/0x_ultra",
-              description:
-                "Follow the creator for more blockchain gaming innovations",
-            },
-          ],
-        });
-      }, 1000);
-
-      // Handle cleanup
-      const handleModalClose = () => {
-        if (spinningAnimationRef.current) {
-          spinningAnimationRef.current.kill();
-        }
-
-        // Re-enable orbit controls
-        if (controls) {
-          controls.enabled = true;
-        }
-
-        gsap.to(camera.position, {
-          x: originalPosition.x,
-          y: originalPosition.y,
-          z: originalPosition.z,
-          duration: 2,
-          ease: "power2.inOut",
-          onComplete: () => {
-            camera.rotation.set(
-              originalRotation.x,
-              originalRotation.y,
-              originalRotation.z
-            );
-          },
-        });
-      };
-
-      window.addEventListener("closeVictoryModal", handleModalClose);
+      // Cleanup
       return () => {
-        window.removeEventListener("closeVictoryModal", handleModalClose);
-        if (spinningAnimationRef.current) {
-          spinningAnimationRef.current.kill();
-        }
         // Re-enable orbit controls on cleanup
         if (controls) {
-          controls.enabled = true;
+          (controls as unknown as { enabled: boolean }).enabled = true;
         }
         gsap.killTweensOf(camera.position);
+        spinAnimation.kill();
       };
     }
-  }, [growthStage, camera, showVictoryModal, controls]);
+  }, [growthStage, camera, controls, showVictoryModal]);
 
   useFrame(({ clock }) => {
     if (energyRingsRef.current) {
@@ -171,10 +129,9 @@ export function SuperSeedPlant(props: SuperSeedProps) {
     <BasePlant
       {...props}
       config={config}
-      renderPlantModel={({ plantRef, hoveredPlantId, id, growthStage }) => {
+      renderPlantModel={({ plantRef, growthStage }) => {
         const scale = 2.0;
         const stemHeight = 0.4 + growthStage * 2.0;
-        const isHovered = hoveredPlantId === id;
 
         return (
           <group ref={plantRef} scale={[scale, scale, scale]}>

@@ -1,10 +1,10 @@
 "use client";
 
 import { Plant } from "@/game/state/GameState";
-import { LuminaBloomPlant } from "./LuminaBloomPlant";
-import { EthereumEssencePlant } from "./EthereumEssencePlant";
-import { OPStackOrchidPlant } from "./OPStackOrchidPlant";
-import { DeFiDandelionPlant } from "./DeFiDandelionPlant";
+import { LuminaBloom } from "./LuminaBloom";
+import { EthereumEssence } from "./EthereumEssence";
+import { OPStackOrchid } from "./OPStackOrchid";
+import { DeFiDandelion } from "./DeFiDandelion";
 import { SuperSeedPlant } from "./SuperSeedPlant";
 
 export function PlantRenderer({ plant }: { plant: Plant }) {
@@ -13,15 +13,11 @@ export function PlantRenderer({ plant }: { plant: Plant }) {
   switch (type) {
     case "LuminaBloom":
       return (
-        <LuminaBloomPlant
-          id={id}
-          position={position}
-          growthStage={growthStage}
-        />
+        <LuminaBloom id={id} position={position} growthStage={growthStage} />
       );
     case "EthereumEssence":
       return (
-        <EthereumEssencePlant
+        <EthereumEssence
           id={id}
           position={position}
           growthStage={growthStage}
@@ -29,19 +25,11 @@ export function PlantRenderer({ plant }: { plant: Plant }) {
       );
     case "OPStackOrchid":
       return (
-        <OPStackOrchidPlant
-          id={id}
-          position={position}
-          growthStage={growthStage}
-        />
+        <OPStackOrchid id={id} position={position} growthStage={growthStage} />
       );
     case "DeFiDandelion":
       return (
-        <DeFiDandelionPlant
-          id={id}
-          position={position}
-          growthStage={growthStage}
-        />
+        <DeFiDandelion id={id} position={position} growthStage={growthStage} />
       );
     case "SuperSeed":
       return (

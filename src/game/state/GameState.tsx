@@ -363,9 +363,15 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
         EthereumEssence: "master_ethereum",
         OPStackOrchid: "master_opstack",
         DeFiDandelion: "master_defi",
-      };
+      } as const;
 
-      const masteryAchievementId = achievementMap[plant.type];
+      // Skip achievement tracking for SuperSeed
+      if (plant.type === "SuperSeed") {
+        return;
+      }
+
+      const masteryAchievementId =
+        achievementMap[plant.type as keyof typeof achievementMap];
       const totalSeeds =
         Object.values(gameProgress.plantMasteries).reduce(
           (total, mastery) => total + mastery.seedsCollected,
