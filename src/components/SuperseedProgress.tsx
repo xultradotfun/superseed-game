@@ -6,6 +6,16 @@ import Image from "next/image";
 
 type Tab = "prophecy" | "achievements" | "mastery";
 
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  progress: number;
+  maxProgress: number;
+  completed: boolean;
+  prophecyPiece?: number;
+}
+
 export function SuperseedProgress() {
   const { gameProgress, canClaimSuperSeed, claimSuperSeed } = useGameState();
   const { superseedProgress, achievements, plantMasteries } = gameProgress;
@@ -37,7 +47,10 @@ export function SuperseedProgress() {
     (a) => a.prophecyPiece === undefined
   );
 
-  const renderAchievementCard = (achievement: any, showPiece?: boolean) => (
+  const renderAchievementCard = (
+    achievement: Achievement,
+    showPiece?: boolean
+  ) => (
     <div
       key={achievement.id}
       className={`relative p-4 rounded-lg border transition-all duration-500 ${
@@ -101,44 +114,44 @@ export function SuperseedProgress() {
   );
 
   return (
-    <div className="fixed left-4 top-4 bg-gradient-to-b from-cyan-950/80 to-slate-950/80 rounded-2xl backdrop-blur-md w-[360px] border border-cyan-500/20 shadow-2xl pointer-events-auto">
+    <div className="fixed left-4 top-4 bg-gradient-to-b from-cyan-950/80 to-slate-950/80 rounded-2xl backdrop-blur-md w-[min(280px,calc(100vw-8rem))] border border-cyan-500/20 shadow-2xl pointer-events-auto">
       {/* Tabs */}
       <div className="flex border-b border-cyan-500/20">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 flex items-center justify-center gap-2 py-4 px-2 text-sm font-medium transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-2 text-xs font-medium transition-all ${
               activeTab === tab.id
                 ? "text-cyan-100 border-b-2 border-cyan-400"
                 : "text-cyan-300/50 hover:text-cyan-300/70"
             }`}
           >
             {tab.icon}
-            {tab.label}
+            <span className="hidden sm:inline">{tab.label}</span>
           </button>
         ))}
       </div>
 
-      <div className="p-6">
+      <div className="p-3">
         {/* Prophecy Tab */}
         {activeTab === "prophecy" && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-400/5 flex items-center justify-center shadow-inner border border-cyan-400/20">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-400/5 flex items-center justify-center shadow-inner border border-cyan-400/20">
                 <Image
                   src="/superlogo.png"
                   alt="Superseed Logo"
-                  width={32}
-                  height={32}
+                  width={20}
+                  height={20}
                   className="opacity-90"
                 />
               </div>
               <div>
-                <h2 className="text-2xl font-medium text-cyan-100">
+                <h2 className="text-lg font-medium text-cyan-100">
                   Sacred Superseed
                 </h2>
-                <p className="text-sm text-cyan-300/60">
+                <p className="text-xs text-cyan-300/60">
                   {superseedProgress.prophecyPiecesFound} of{" "}
                   {superseedProgress.totalPieces} pieces found
                 </p>
@@ -155,16 +168,16 @@ export function SuperseedProgress() {
 
         {/* Achievements Tab */}
         {activeTab === "achievements" && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-400/5 flex items-center justify-center shadow-inner border border-cyan-400/20">
-                <FaTrophy className="w-6 h-6 text-cyan-400" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-400/5 flex items-center justify-center shadow-inner border border-cyan-400/20">
+                <FaTrophy className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-medium text-cyan-100">
+                <h2 className="text-xl sm:text-2xl font-medium text-cyan-100">
                   Achievements
                 </h2>
-                <p className="text-sm text-cyan-300/60">
+                <p className="text-xs sm:text-sm text-cyan-300/60">
                   {regularAchievements.filter((a) => a.completed).length} of{" "}
                   {regularAchievements.length} completed
                 </p>
@@ -181,16 +194,16 @@ export function SuperseedProgress() {
 
         {/* Mastery Tab */}
         {activeTab === "mastery" && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-400/5 flex items-center justify-center shadow-inner border border-cyan-400/20">
-                <FaSeedling className="w-6 h-6 text-cyan-400" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-400/5 flex items-center justify-center shadow-inner border border-cyan-400/20">
+                <FaSeedling className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-medium text-cyan-100">
+                <h2 className="text-xl sm:text-2xl font-medium text-cyan-100">
                   Plant Mastery
                 </h2>
-                <p className="text-sm text-cyan-300/60">
+                <p className="text-xs sm:text-sm text-cyan-300/60">
                   Master each type of plant
                 </p>
               </div>
@@ -200,7 +213,7 @@ export function SuperseedProgress() {
               {Object.entries(plantMasteries).map(([type, mastery]) => (
                 <div
                   key={type}
-                  className={`p-4 rounded-lg border transition-all duration-500 ${
+                  className={`p-3 sm:p-4 rounded-lg border transition-all duration-500 ${
                     mastery.perfectGrowths >= 10
                       ? "bg-gradient-to-br from-cyan-500/30 to-cyan-400/20 border-cyan-400/30 shadow-lg shadow-cyan-500/20 transform hover:-translate-y-0.5"
                       : "bg-gradient-to-br from-cyan-950/40 to-slate-950/40 border-cyan-500/20"
@@ -249,15 +262,15 @@ export function SuperseedProgress() {
       {/* Add SuperSeed claim section when all pieces are found */}
       {superseedProgress.prophecyPiecesFound ===
         superseedProgress.totalPieces && (
-        <div className="p-4 border-t border-cyan-500/20">
+        <div className="p-3 sm:p-4 border-t border-cyan-500/20">
           <div className="text-center">
             {canClaimSuperSeed() ? (
               <>
-                <div className="mb-4">
-                  <div className="text-lg font-medium text-cyan-100 mb-2">
+                <div className="mb-3 sm:mb-4">
+                  <div className="text-base sm:text-lg font-medium text-cyan-100 mb-2">
                     🎉 Sacred SuperSeed Unlocked! 🎉
                   </div>
-                  <div className="text-sm text-cyan-300/60">
+                  <div className="text-xs sm:text-sm text-cyan-300/60">
                     You have collected all prophecy pieces and unlocked the
                     legendary Sacred SuperSeed!
                   </div>
@@ -270,7 +283,7 @@ export function SuperseedProgress() {
                 </button>
               </>
             ) : (
-              <div className="text-sm text-cyan-300/60">
+              <div className="text-xs sm:text-sm text-cyan-300/60">
                 You have already claimed the Sacred SuperSeed.
               </div>
             )}

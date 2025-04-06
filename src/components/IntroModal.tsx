@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { gsap } from "gsap";
+import gsap from "gsap";
+import { Modal } from "./shared/Modal";
 
 interface IntroModalProps {
   title: string;
@@ -20,85 +21,22 @@ export function IntroModal() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const handleShowModal = (event: CustomEvent<IntroModalProps>) => {
+    const hasSeenIntro = localStorage.getItem("hasSeenIntro");
+    if (!hasSeenIntro) {
       setIsVisible(true);
-    };
-
-    window.addEventListener("showIntroModal", handleShowModal as EventListener);
-    return () => {
-      window.removeEventListener(
-        "showIntroModal",
-        handleShowModal as EventListener
-      );
-    };
+      localStorage.setItem("hasSeenIntro", "true");
+    }
   }, []);
-
-  const handleClose = () => {
-    gsap.to("#intro-modal", {
-      scale: 0.8,
-      opacity: 0,
-      y: 20,
-      duration: 0.3,
-      ease: "power2.in",
-      onComplete: () => {
-        setIsVisible(false);
-        window.dispatchEvent(new Event("closeIntroModal"));
-      },
-    });
-  };
 
   useEffect(() => {
     if (isVisible) {
-      // Animate modal entrance
-      gsap.fromTo(
-        "#intro-modal",
-        {
-          scale: 0.8,
-          opacity: 0,
-          y: 20,
-        },
-        {
-          scale: 1,
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: "back.out(1.7)",
-        }
-      );
-
-      // Create sparkle container
-      const sparkleContainer = document.createElement("div");
-      sparkleContainer.style.position = "fixed";
-      sparkleContainer.style.inset = "0";
-      sparkleContainer.style.pointerEvents = "none";
-      sparkleContainer.style.zIndex = "100";
-      document.body.appendChild(sparkleContainer);
-
-      // Animate sparkles
-      const sparkleColors = ["#00ffff", "#1cd8d2", "#2dd4bf", "#ffffff"];
-      for (let i = 0; i < 30; i++) {
-        const sparkle = document.createElement("div");
-        sparkle.className = "absolute w-1 h-1 rounded-full";
-        sparkle.style.backgroundColor =
-          sparkleColors[Math.floor(Math.random() * sparkleColors.length)];
-        sparkle.style.left = Math.random() * 100 + "vw";
-        sparkle.style.top = "-10px";
-        sparkleContainer.appendChild(sparkle);
-
-        gsap.to(sparkle, {
-          y: "120vh",
-          x: `random(-100, 100)`,
-          rotation: "random(-360, 360)",
-          duration: "random(1.5, 3)",
-          ease: "power1.out",
-          onComplete: () => sparkle.remove(),
-        });
-      }
-
-      // Cleanup function
-      return () => {
-        sparkleContainer.remove();
-      };
+      gsap.from(".intro-content > *", {
+        y: 20,
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: "power2.out",
+      });
     }
   }, [isVisible]);
 
@@ -153,31 +91,8 @@ export function IntroModal() {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
-      <div
-        id="intro-modal"
-        className="bg-gradient-to-b from-cyan-950/90 to-slate-950/90 p-8 rounded-2xl border border-cyan-500/30 shadow-2xl max-w-2xl w-full mx-4 relative"
-      >
-        <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 text-cyan-400 hover:text-cyan-300 transition-colors"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-
+    <Modal onClose={() => setIsVisible(false)} maxWidth="xl">
+      <div className="intro-content space-y-6">
         <h2 className="text-3xl font-bold text-cyan-400 mb-6">
           {modalContent.title}
         </h2>
@@ -226,6 +141,6 @@ export function IntroModal() {
           ))}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

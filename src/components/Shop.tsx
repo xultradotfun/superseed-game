@@ -67,25 +67,23 @@ export function Shop({ isOpen, onToggle }: ShopProps) {
 
   return (
     <button onClick={onToggle} className="relative group">
-      <div className="bg-cyan-500/10 backdrop-blur-md p-3 rounded-xl text-cyan-300 hover:bg-cyan-500/20 transition-all border border-cyan-500/20 shadow-lg shadow-cyan-500/5">
-        <FaStore className="w-6 h-6 group-hover:scale-110 transition-transform" />
+      <div className="bg-cyan-500/10 backdrop-blur-md p-2 rounded-xl text-cyan-300 hover:bg-cyan-500/20 transition-all border border-cyan-500/20 shadow-lg shadow-cyan-500/5">
+        <FaStore className="w-5 h-5 group-hover:scale-110 transition-transform" />
       </div>
 
       {isOpen && (
         <div
-          className="absolute top-full right-0 mt-3 bg-gradient-to-b from-cyan-950/80 to-slate-950/80 backdrop-blur-md rounded-2xl text-white shadow-2xl min-w-[400px] max-h-[calc(100vh-8rem)] overflow-y-auto border border-cyan-500/20"
+          className="absolute top-full right-0 mt-2 bg-gradient-to-b from-cyan-950/80 to-slate-950/80 backdrop-blur-md rounded-2xl text-white shadow-2xl w-[min(280px,calc(100vw-2rem))] max-h-[calc(100vh-8rem)] overflow-y-auto border border-cyan-500/20"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-6 border-b border-cyan-500/20 bg-cyan-500/5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-400/5 flex items-center justify-center shadow-inner border border-cyan-400/20">
-                <HiSparkles className="w-6 h-6 text-cyan-400" />
+          <div className="p-3 border-b border-cyan-500/20 bg-cyan-500/5">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-400/5 flex items-center justify-center shadow-inner border border-cyan-400/20">
+                <HiSparkles className="w-4 h-4 text-cyan-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-medium text-cyan-100">
-                  Seed Shop
-                </h2>
-                <p className="text-sm text-cyan-300/60">
+                <h2 className="text-lg font-medium text-cyan-100">Seed Shop</h2>
+                <p className="text-xs text-cyan-300/60">
                   Discover unique plant varieties
                 </p>
               </div>
