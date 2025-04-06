@@ -4,6 +4,7 @@ import "./globals.css";
 import { VictoryModal } from "@/components/VictoryModal";
 import { IntroModal } from "@/components/IntroModal";
 import { ConceptModal } from "@/components/ConceptModal";
+import { MobileWarning } from "@/components/MobileWarning";
 import { GameStateProvider } from "@/game/state/GameState";
 
 const geistSans = Geist({
@@ -36,6 +37,7 @@ export default function RootLayout({
           <VictoryModal />
           <IntroModal />
           <ConceptModal />
+          <MobileWarning />
         </GameStateProvider>
       </body>
     </html>
