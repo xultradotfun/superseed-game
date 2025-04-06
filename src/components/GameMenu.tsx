@@ -5,23 +5,30 @@ import { useGameState, PlantType } from "@/game/state/GameState";
 import { FaSeedling, FaTimes } from "react-icons/fa";
 
 export function GameMenu() {
-  const [isInventoryOpen, setIsInventoryOpen] = useState(false);
+  const [isInventoryOpen, setIsInventoryOpen] = useState(true);
   const { inventory, selectedPlantType, setSelectedPlantType } = useGameState();
 
   return (
     <div className="pointer-events-none">
-      {/* Top Bar */}
+      {/* Inventory Button and Panel */}
       <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2 pointer-events-auto">
         <button
           onClick={() => setIsInventoryOpen(!isInventoryOpen)}
-          className="bg-white/10 backdrop-blur-md p-3 rounded-lg text-white hover:bg-white/20 transition-colors"
+          className="bg-black/20 backdrop-blur-md p-3 rounded-xl text-white/90 hover:bg-black/30 transition-all"
         >
           <FaSeedling className="w-6 h-6" />
         </button>
 
         {isInventoryOpen && (
-          <div className="absolute top-16 right-0 bg-white/10 backdrop-blur-md rounded-lg p-4 text-white shadow-lg min-w-[200px]">
-            <h2 className="text-lg font-semibold mb-3">Seeds</h2>
+          <div className="absolute top-16 right-0 bg-black/20 backdrop-blur-md rounded-2xl p-6 text-white shadow-xl min-w-[280px]">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                <FaSeedling className="w-5 h-5" />
+              </div>
+              <h2 className="text-xl font-medium text-white/90">
+                Seed Inventory
+              </h2>
+            </div>
             <div className="space-y-2">
               {Object.entries(inventory).map(([type, count]) => (
                 <button
@@ -30,15 +37,24 @@ export function GameMenu() {
                     setSelectedPlantType(type as PlantType);
                     setIsInventoryOpen(true);
                   }}
-                  className={`w-full flex justify-between items-center p-2 rounded ${
-                    selectedPlantType === type
-                      ? "bg-white/20"
-                      : "hover:bg-white/10"
-                  }`}
                   disabled={count === 0}
+                  className={`w-full flex justify-between items-center p-3 rounded-xl transition-all ${
+                    count === 0
+                      ? "opacity-30 cursor-not-allowed"
+                      : selectedPlantType === type
+                      ? "bg-white/20 text-white"
+                      : "hover:bg-white/10 text-white/90"
+                  }`}
                 >
-                  <span>{type}</span>
-                  <span className="text-sm opacity-80">{count}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                      <span className="text-lg">🌱</span>
+                    </div>
+                    <span className="font-medium">{type}</span>
+                  </div>
+                  <span className="bg-white/10 px-3 py-1 rounded-full text-sm">
+                    {count}
+                  </span>
                 </button>
               ))}
             </div>
@@ -47,30 +63,62 @@ export function GameMenu() {
       </div>
 
       {/* Controls Help */}
-      <div className="absolute bottom-4 left-4 bg-white/10 backdrop-blur-md rounded-lg p-4 text-white pointer-events-auto">
-        <h2 className="text-lg font-semibold mb-2">Controls</h2>
-        <ul className="space-y-1 text-sm">
-          <li>🖱️ Left Click + Drag: Rotate Camera</li>
-          <li>🖱️ Right Click + Drag: Pan Camera</li>
-          <li>🖱️ Scroll: Zoom Camera</li>
-          <li>⌨️ Space: Water Plants</li>
-          {selectedPlantType && <li>🖱️ Click: Plant {selectedPlantType}</li>}
-        </ul>
+      <div className="absolute bottom-4 right-4 bg-black/20 backdrop-blur-md rounded-2xl p-6 text-white pointer-events-auto">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+            <span className="text-2xl">🎮</span>
+          </div>
+          <h2 className="text-xl font-medium text-white/90">Controls</h2>
+        </div>
+        <div className="space-y-3">
+          {[
+            ["🖱️ Left Click + Drag", "Rotate Camera"],
+            ["🖱️ Right Click + Drag", "Pan Camera"],
+            ["🖱️ Scroll", "Zoom Camera"],
+            ["⌨️ Space", "Water Plants"],
+            ...(selectedPlantType
+              ? [["🖱️ Click", `Plant ${selectedPlantType}`]]
+              : []),
+          ].map(([action, description]) => (
+            <div key={action} className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                <span className="text-sm">{action.split(" ")[0]}</span>
+              </div>
+              <div>
+                <div className="text-sm text-white/90">
+                  {action.split(" ").slice(1).join(" ")}
+                </div>
+                <div className="text-xs text-white/50">{description}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Planting Mode Indicator */}
       {selectedPlantType && (
-        <div className="absolute top-4 left-4 bg-white/10 backdrop-blur-md rounded-lg p-4 text-white pointer-events-auto flex items-center gap-4">
-          <div>
-            <div className="text-sm opacity-80">Currently Planting</div>
-            <div className="font-semibold">{selectedPlantType}</div>
+        <div className="absolute top-20 right-4 bg-black/20 backdrop-blur-md rounded-2xl p-6 text-white pointer-events-auto">
+          <div className="flex items-center gap-4">
+            <div>
+              <div className="text-sm text-white/50 uppercase tracking-wider">
+                Currently Planting
+              </div>
+              <div className="flex items-center gap-3 mt-2">
+                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                  <span className="text-lg">🌱</span>
+                </div>
+                <span className="font-medium text-white/90">
+                  {selectedPlantType}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setSelectedPlantType(null)}
+              className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all"
+            >
+              <FaTimes className="w-4 h-4" />
+            </button>
           </div>
-          <button
-            onClick={() => setSelectedPlantType(null)}
-            className="bg-white/10 p-2 rounded hover:bg-white/20 transition-colors"
-          >
-            <FaTimes />
-          </button>
         </div>
       )}
     </div>

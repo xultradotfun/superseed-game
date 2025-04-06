@@ -16,6 +16,25 @@ export type PlantType =
   | "OPStackOrchid"
   | "DeFiDandelion";
 
+// Achievement tracking
+export type Achievement = {
+  id: string;
+  name: string;
+  description: string;
+  completed: boolean;
+  progress: number;
+  maxProgress: number;
+  prophecyPiece?: number; // Which prophecy piece this achievement unlocks (0-3)
+};
+
+// Plant mastery tracking
+export type PlantMastery = {
+  plantsGrown: number;
+  perfectGrowths: number;
+  seedsCollected: number;
+  timesCaredFor: number;
+};
+
 export type Plant = {
   id: string;
   type: PlantType;
@@ -28,6 +47,88 @@ type Plants = Record<string, Plant>;
 
 type Inventory = {
   [K in PlantType]: number;
+};
+
+// Track overall game progression
+type GameProgress = {
+  plantMasteries: Record<PlantType, PlantMastery>;
+  achievements: Achievement[];
+  superseedProgress: {
+    prophecyPiecesFound: number;
+    totalPieces: number;
+    unlockedCombinations: string[];
+    completedRituals: string[];
+  };
+};
+
+const INITIAL_ACHIEVEMENTS: Achievement[] = [
+  {
+    id: "master_lumina",
+    name: "Lumina Master",
+    description: "Master the Lumina Bloom by growing 10 perfect specimens",
+    completed: false,
+    progress: 0,
+    maxProgress: 10,
+    prophecyPiece: 0,
+  },
+  {
+    id: "master_ethereum",
+    name: "Ethereum Essence Expert",
+    description: "Master the Ethereum Essence by growing 10 perfect specimens",
+    completed: false,
+    progress: 0,
+    maxProgress: 10,
+    prophecyPiece: 1,
+  },
+  {
+    id: "master_opstack",
+    name: "OP Stack Oracle",
+    description: "Master the OP Stack Orchid by growing 10 perfect specimens",
+    completed: false,
+    progress: 0,
+    maxProgress: 10,
+    prophecyPiece: 2,
+  },
+  {
+    id: "master_defi",
+    name: "DeFi Sage",
+    description: "Master the DeFi Dandelion by growing 10 perfect specimens",
+    completed: false,
+    progress: 0,
+    maxProgress: 10,
+    prophecyPiece: 3,
+  },
+  {
+    id: "grow_first_plant",
+    name: "First Steps",
+    description: "Grow your first plant to completion",
+    completed: false,
+    progress: 0,
+    maxProgress: 1,
+  },
+  {
+    id: "efficient_gardener",
+    name: "Efficient Gardener",
+    description: "Maintain 3 plants simultaneously at full growth",
+    completed: false,
+    progress: 0,
+    maxProgress: 3,
+  },
+  {
+    id: "seed_collector",
+    name: "Seed Collector",
+    description: "Collect 50 seeds in total",
+    completed: false,
+    progress: 0,
+    maxProgress: 50,
+  },
+];
+
+const INITIAL_PLANT_MASTERY: PlantMastery = {
+  plantsGrown: 0,
+  perfectGrowths: 0,
+  seedsCollected: 0,
+  timesCaredFor: 0,
 };
 
 const generateId = () => Math.random().toString(36).substring(7);
@@ -62,6 +163,7 @@ type GameState = {
   waterPlant: (plantId: string) => void;
   handlePlanting: (position: Vector3) => void;
   harvestPlant: (plantId: string) => void;
+  gameProgress: GameProgress;
 };
 
 const GameStateContext = createContext<GameState | null>(null);
@@ -77,6 +179,23 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
   const [selectedPlantType, setSelectedPlantType] = useState<PlantType | null>(
     null
   );
+
+  // Add new state for progression tracking
+  const [gameProgress, setGameProgress] = useState<GameProgress>({
+    plantMasteries: {
+      LuminaBloom: { ...INITIAL_PLANT_MASTERY },
+      EthereumEssence: { ...INITIAL_PLANT_MASTERY },
+      OPStackOrchid: { ...INITIAL_PLANT_MASTERY },
+      DeFiDandelion: { ...INITIAL_PLANT_MASTERY },
+    },
+    achievements: INITIAL_ACHIEVEMENTS,
+    superseedProgress: {
+      prophecyPiecesFound: 0,
+      totalPieces: 4,
+      unlockedCombinations: [],
+      completedRituals: [],
+    },
+  });
 
   // Start ambient music when the game loads
   useEffect(() => {
@@ -115,15 +234,244 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const harvestPlant = (id: string) => {
-    console.log("Attempting to harvest plant:", id);
+  // Function to update achievement progress
+  const updateAchievement = (achievementId: string, progress: number) => {
+    return new Promise<void>((resolve) => {
+      setGameProgress((prev) => {
+        const updatedAchievements = prev.achievements.map((achievement) => {
+          if (achievement.id === achievementId) {
+            const newProgress = Math.min(achievement.maxProgress, progress);
+            const wasCompleted = achievement.completed;
+            const isNowCompleted = newProgress >= achievement.maxProgress;
+
+            // Log achievement update
+            console.log(`Updating achievement ${achievement.name}:`, {
+              oldProgress: achievement.progress,
+              newProgress,
+              wasCompleted,
+              isNowCompleted,
+            });
+
+            // Only trigger completion events if this is the first time completing
+            if (!wasCompleted && isNowCompleted) {
+              console.log(`Achievement ${achievement.name} just completed!`);
+              soundSystem.play("ui", "success");
+            }
+
+            return {
+              ...achievement,
+              progress: newProgress,
+              completed: isNowCompleted,
+            };
+          }
+          return achievement;
+        });
+
+        const newState = {
+          ...prev,
+          achievements: updatedAchievements,
+        };
+
+        // Resolve after state update
+        queueMicrotask(() => {
+          resolve();
+          checkSuperseedProgress();
+        });
+
+        return newState;
+      });
+    });
+  };
+
+  // Function to update plant mastery
+  const updatePlantMastery = (
+    type: PlantType,
+    update: Partial<PlantMastery>
+  ) => {
+    setGameProgress((prev) => ({
+      ...prev,
+      plantMasteries: {
+        ...prev.plantMasteries,
+        [type]: {
+          ...prev.plantMasteries[type],
+          ...update,
+        },
+      },
+    }));
+  };
+
+  // Check if player has unlocked the Superseed
+  const checkSuperseedProgress = () => {
+    const { achievements, superseedProgress } = gameProgress;
+    const unlockedPieces = new Set<number>();
+
+    // Debug logging for achievements
+    console.log("Checking achievements for prophecy pieces:");
+    achievements.forEach((achievement) => {
+      console.log(
+        `${achievement.name}: completed=${achievement.completed}, progress=${achievement.progress}/${achievement.maxProgress}, piece=${achievement.prophecyPiece}`
+      );
+      if (achievement.completed && achievement.prophecyPiece !== undefined) {
+        unlockedPieces.add(achievement.prophecyPiece);
+        console.log(
+          `Added prophecy piece ${achievement.prophecyPiece} from ${achievement.name}`
+        );
+      }
+    });
+
+    const newPiecesCount = unlockedPieces.size;
+    console.log(`Total unlocked pieces: ${newPiecesCount}`);
+
+    // Only update if we found new pieces
+    if (newPiecesCount > superseedProgress.prophecyPiecesFound) {
+      console.log(
+        `Updating prophecy pieces from ${superseedProgress.prophecyPiecesFound} to ${newPiecesCount}`
+      );
+
+      // Force an immediate state update
+      const newCombination = `Prophecy Piece ${newPiecesCount} Unlocked!`;
+      setGameProgress((prev) => {
+        const newState = {
+          ...prev,
+          superseedProgress: {
+            ...prev.superseedProgress,
+            prophecyPiecesFound: newPiecesCount,
+            unlockedCombinations: [
+              ...prev.superseedProgress.unlockedCombinations,
+              newCombination,
+            ],
+          },
+        };
+
+        // Play special sound for finding a prophecy piece
+        queueMicrotask(() => {
+          soundSystem.play("ui", "success");
+
+          // If all pieces are found, trigger the final revelation
+          if (newPiecesCount === prev.superseedProgress.totalPieces) {
+            console.log(
+              "All prophecy pieces found! The Superseed can now be discovered!"
+            );
+            // TODO: Implement final revelation ceremony
+          }
+        });
+
+        return newState;
+      });
+    }
+  };
+
+  const harvestPlant = async (id: string) => {
     const plant = plants[id];
-    console.log("Plant data:", plant);
     if (plant && plant.growthStage >= 1) {
-      console.log("Plant is ready for harvest");
-      // Add seeds to inventory (2-3 seeds per harvest)
+      // Calculate all the new values first
       const seedCount = Math.floor(Math.random() * 2) + 2;
-      console.log("Adding", seedCount, "seeds to inventory");
+      const isPerfectGrowth = plant.growthStage >= 1;
+      const currentMastery = gameProgress.plantMasteries[plant.type];
+      const newPerfectGrowths =
+        currentMastery.perfectGrowths + (isPerfectGrowth ? 1 : 0);
+
+      // Calculate achievement updates
+      const achievementMap = {
+        LuminaBloom: "master_lumina",
+        EthereumEssence: "master_ethereum",
+        OPStackOrchid: "master_opstack",
+        DeFiDandelion: "master_defi",
+      };
+
+      const masteryAchievementId = achievementMap[plant.type];
+      const fullGrownPlants = Object.values(plants).filter(
+        (p) => p.growthStage >= 1
+      ).length;
+      const totalSeeds =
+        Object.values(gameProgress.plantMasteries).reduce(
+          (total, mastery) => total + mastery.seedsCollected,
+          0
+        ) + seedCount;
+
+      // Single atomic state update
+      setGameProgress((prev) => {
+        // Update achievements first
+        const updatedAchievements = prev.achievements.map((achievement) => {
+          if (achievement.id === masteryAchievementId) {
+            const isNowCompleted = newPerfectGrowths >= achievement.maxProgress;
+            return {
+              ...achievement,
+              progress: newPerfectGrowths,
+              completed: isNowCompleted,
+            };
+          } else if (achievement.id === "grow_first_plant") {
+            return { ...achievement, progress: 1, completed: true };
+          } else if (achievement.id === "efficient_gardener") {
+            return {
+              ...achievement,
+              progress: fullGrownPlants,
+              completed: fullGrownPlants >= achievement.maxProgress,
+            };
+          } else if (achievement.id === "seed_collector") {
+            return {
+              ...achievement,
+              progress: totalSeeds,
+              completed: totalSeeds >= achievement.maxProgress,
+            };
+          }
+          return achievement;
+        });
+
+        // Check for newly completed achievements with prophecy pieces
+        const unlockedPieces = new Set<number>();
+        updatedAchievements.forEach((achievement) => {
+          if (
+            achievement.completed &&
+            achievement.prophecyPiece !== undefined
+          ) {
+            unlockedPieces.add(achievement.prophecyPiece);
+          }
+        });
+
+        const newPiecesCount = unlockedPieces.size;
+        const hadNewPieces =
+          newPiecesCount > prev.superseedProgress.prophecyPiecesFound;
+
+        // If we have new pieces, play the success sound
+        if (hadNewPieces) {
+          queueMicrotask(() => {
+            soundSystem.play("ui", "success");
+            if (newPiecesCount === prev.superseedProgress.totalPieces) {
+              console.log(
+                "All prophecy pieces found! The Superseed can now be discovered!"
+              );
+            }
+          });
+        }
+
+        // Return the complete new state
+        return {
+          ...prev,
+          plantMasteries: {
+            ...prev.plantMasteries,
+            [plant.type]: {
+              plantsGrown: currentMastery.plantsGrown + 1,
+              perfectGrowths: newPerfectGrowths,
+              seedsCollected: currentMastery.seedsCollected + seedCount,
+              timesCaredFor: currentMastery.timesCaredFor,
+            },
+          },
+          achievements: updatedAchievements,
+          superseedProgress: hadNewPieces
+            ? {
+                ...prev.superseedProgress,
+                prophecyPiecesFound: newPiecesCount,
+                unlockedCombinations: [
+                  ...prev.superseedProgress.unlockedCombinations,
+                  `Prophecy Piece ${newPiecesCount} Unlocked!`,
+                ],
+              }
+            : prev.superseedProgress,
+        };
+      });
+
+      // Update inventory
       setInventory((prev) => ({
         ...prev,
         [plant.type]: prev[plant.type] + seedCount,
@@ -138,12 +486,6 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
 
       // Play harvest sound
       soundSystem.play("effects", "harvest");
-      console.log("Plant harvested successfully");
-    } else {
-      console.log("Plant not ready for harvest:", {
-        plant,
-        growthStage: plant?.growthStage,
-      });
     }
   };
 
@@ -172,6 +514,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
         waterPlant,
         handlePlanting,
         harvestPlant,
+        gameProgress,
       }}
     >
       {children}
