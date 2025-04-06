@@ -97,12 +97,6 @@ export function SuperSeedPlant(props: SuperSeedProps) {
                 "Discover Supercollateral: self-repaying loans powered by Proof of Repayment (PoR). Join a culture of contribution and help expand Ethereum's frontier.",
             },
             {
-              text: "📚 Read the Docs",
-              url: "https://docs.superseed.xyz/",
-              description:
-                "Learn about Superseed's innovative features: CDP Protocol, Repayment Vaults, and seamless EVM compatibility.",
-            },
-            {
               text: "𝕏 Made by 0x_ultra",
               url: "https://twitter.com/0x_ultra",
               description:
