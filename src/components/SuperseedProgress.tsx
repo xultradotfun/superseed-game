@@ -37,6 +37,69 @@ export function SuperseedProgress() {
     (a) => a.prophecyPiece === undefined
   );
 
+  const renderAchievementCard = (achievement: any, showPiece?: boolean) => (
+    <div
+      key={achievement.id}
+      className={`relative p-4 rounded-lg border transition-all duration-500 ${
+        achievement.completed
+          ? "bg-gradient-to-br from-cyan-500/30 to-cyan-400/20 border-cyan-400/30 shadow-lg shadow-cyan-500/20 transform hover:-translate-y-0.5"
+          : "bg-gradient-to-br from-cyan-950/40 to-slate-950/40 border-cyan-500/20"
+      }`}
+    >
+      {/* Completion Effects */}
+      {achievement.completed && (
+        <>
+          <div className="absolute inset-0 rounded-lg bg-cyan-400/10 animate-pulse" />
+          <div className="absolute -inset-px rounded-lg bg-gradient-to-r from-cyan-400/0 via-cyan-400/50 to-cyan-400/0 opacity-20 animate-[shimmer_2s_infinite]" />
+        </>
+      )}
+
+      <div className="relative">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            {achievement.completed ? (
+              <div className="relative">
+                <FaStar className="w-5 h-5 text-cyan-400 animate-[pulse_2s_infinite]" />
+                <div className="absolute inset-0 w-5 h-5 bg-cyan-400 rounded-full blur-sm opacity-50 animate-[pulse_2s_infinite]" />
+              </div>
+            ) : (
+              <FaLock className="w-4 h-4 text-cyan-300/30" />
+            )}
+            <span className="font-medium text-cyan-100">
+              {achievement.name}
+            </span>
+          </div>
+          {showPiece && (
+            <span className="text-sm text-cyan-300/60">
+              Piece {(achievement.prophecyPiece ?? 0) + 1}
+            </span>
+          )}
+          {!showPiece && (
+            <span className="text-sm tabular-nums text-cyan-300/60">
+              {achievement.progress}/{achievement.maxProgress}
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-cyan-300/60 mb-3">
+          {achievement.description}
+        </p>
+        <div className="h-1.5 bg-cyan-950/60 rounded-full overflow-hidden">
+          <div
+            className="h-full transition-all duration-1000 ease-out"
+            style={{
+              width: `${
+                (achievement.progress / achievement.maxProgress) * 100
+              }%`,
+              background: achievement.completed
+                ? "linear-gradient(to right, rgb(34 211 238 / 0.6), rgb(34 211 238 / 0.8))"
+                : "linear-gradient(to right, rgb(34 211 238 / 0.1), rgb(34 211 238 / 0.2))",
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="fixed left-4 top-4 bg-gradient-to-b from-cyan-950/80 to-slate-950/80 rounded-2xl backdrop-blur-md w-[360px] border border-cyan-500/20 shadow-2xl pointer-events-auto">
       {/* Tabs */}
@@ -85,49 +148,7 @@ export function SuperseedProgress() {
             <div className="space-y-3">
               {prophecyAchievements
                 .sort((a, b) => (a.prophecyPiece ?? 0) - (b.prophecyPiece ?? 0))
-                .map((achievement) => (
-                  <div
-                    key={achievement.id}
-                    className={`p-4 rounded-lg border ${
-                      achievement.completed
-                        ? "bg-gradient-to-br from-cyan-500/30 to-cyan-400/20 border-cyan-400/30"
-                        : "bg-gradient-to-br from-cyan-950/40 to-slate-950/40 border-cyan-500/20"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        {achievement.completed ? (
-                          <FaStar className="w-4 h-4 text-cyan-400" />
-                        ) : (
-                          <FaLock className="w-4 h-4 text-cyan-300/30" />
-                        )}
-                        <span className="font-medium text-cyan-100">
-                          {achievement.name}
-                        </span>
-                      </div>
-                      <span className="text-sm text-cyan-300/60">
-                        Piece {(achievement.prophecyPiece ?? 0) + 1}
-                      </span>
-                    </div>
-                    <p className="text-sm text-cyan-300/60 mb-3">
-                      {achievement.description}
-                    </p>
-                    <div className="h-1.5 bg-cyan-950/60 rounded-full overflow-hidden">
-                      <div
-                        className="h-full transition-all duration-500"
-                        style={{
-                          width: `${
-                            (achievement.progress / achievement.maxProgress) *
-                            100
-                          }%`,
-                          background: achievement.completed
-                            ? "linear-gradient(to right, rgb(34 211 238 / 0.4), rgb(34 211 238 / 0.6))"
-                            : "linear-gradient(to right, rgb(34 211 238 / 0.1), rgb(34 211 238 / 0.2))",
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                .map((achievement) => renderAchievementCard(achievement, true))}
             </div>
           </div>
         )}
@@ -151,48 +172,9 @@ export function SuperseedProgress() {
             </div>
 
             <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-              {regularAchievements.map((achievement) => (
-                <div
-                  key={achievement.id}
-                  className={`p-4 rounded-lg border ${
-                    achievement.completed
-                      ? "bg-gradient-to-br from-cyan-500/30 to-cyan-400/20 border-cyan-400/30"
-                      : "bg-gradient-to-br from-cyan-950/40 to-slate-950/40 border-cyan-500/20"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      {achievement.completed ? (
-                        <FaStar className="w-4 h-4 text-cyan-400" />
-                      ) : (
-                        <FaLock className="w-4 h-4 text-cyan-300/30" />
-                      )}
-                      <span className="font-medium text-cyan-100">
-                        {achievement.name}
-                      </span>
-                    </div>
-                    <span className="text-sm tabular-nums text-cyan-300/60">
-                      {achievement.progress}/{achievement.maxProgress}
-                    </span>
-                  </div>
-                  <p className="text-sm text-cyan-300/60 mb-3">
-                    {achievement.description}
-                  </p>
-                  <div className="h-1.5 bg-cyan-950/60 rounded-full overflow-hidden">
-                    <div
-                      className="h-full transition-all duration-500"
-                      style={{
-                        width: `${
-                          (achievement.progress / achievement.maxProgress) * 100
-                        }%`,
-                        background: achievement.completed
-                          ? "linear-gradient(to right, rgb(34 211 238 / 0.4), rgb(34 211 238 / 0.6))"
-                          : "linear-gradient(to right, rgb(34 211 238 / 0.1), rgb(34 211 238 / 0.2))",
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+              {regularAchievements.map((achievement) =>
+                renderAchievementCard(achievement)
+              )}
             </div>
           </div>
         )}
@@ -218,32 +200,44 @@ export function SuperseedProgress() {
               {Object.entries(plantMasteries).map(([type, mastery]) => (
                 <div
                   key={type}
-                  className="p-4 rounded-lg border bg-gradient-to-br from-cyan-950/40 to-slate-950/40 border-cyan-500/20"
+                  className={`p-4 rounded-lg border transition-all duration-500 ${
+                    mastery.perfectGrowths >= 10
+                      ? "bg-gradient-to-br from-cyan-500/30 to-cyan-400/20 border-cyan-400/30 shadow-lg shadow-cyan-500/20 transform hover:-translate-y-0.5"
+                      : "bg-gradient-to-br from-cyan-950/40 to-slate-950/40 border-cyan-500/20"
+                  }`}
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h3 className="font-medium text-cyan-100">{type}</h3>
-                      <div className="flex gap-4 mt-1.5 text-xs text-cyan-300/60">
-                        <span>🌱 {mastery.plantsGrown} grown</span>
-                        <span>✨ {mastery.perfectGrowths} perfect</span>
-                        <span>🎯 {mastery.seedsCollected} seeds</span>
+                  {mastery.perfectGrowths >= 10 && (
+                    <>
+                      <div className="absolute inset-0 rounded-lg bg-cyan-400/10 animate-pulse" />
+                      <div className="absolute -inset-px rounded-lg bg-gradient-to-r from-cyan-400/0 via-cyan-400/50 to-cyan-400/0 opacity-20 animate-[shimmer_2s_infinite]" />
+                    </>
+                  )}
+                  <div className="relative">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h3 className="font-medium text-cyan-100">{type}</h3>
+                        <div className="flex gap-4 mt-1.5 text-xs text-cyan-300/60">
+                          <span>🌱 {mastery.plantsGrown} grown</span>
+                          <span>✨ {mastery.perfectGrowths} perfect</span>
+                          <span>🎯 {mastery.seedsCollected} seeds</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="h-1.5 bg-cyan-950/60 rounded-full overflow-hidden">
-                    <div
-                      className="h-full transition-all duration-500"
-                      style={{
-                        width: `${Math.min(
-                          (mastery.perfectGrowths / 10) * 100,
-                          100
-                        )}%`,
-                        background:
-                          mastery.perfectGrowths >= 10
-                            ? "linear-gradient(to right, rgb(34 211 238 / 0.4), rgb(34 211 238 / 0.6))"
-                            : "linear-gradient(to right, rgb(34 211 238 / 0.1), rgb(34 211 238 / 0.2))",
-                      }}
-                    />
+                    <div className="h-1.5 bg-cyan-950/60 rounded-full overflow-hidden">
+                      <div
+                        className="h-full transition-all duration-1000 ease-out"
+                        style={{
+                          width: `${Math.min(
+                            (mastery.perfectGrowths / 10) * 100,
+                            100
+                          )}%`,
+                          background:
+                            mastery.perfectGrowths >= 10
+                              ? "linear-gradient(to right, rgb(34 211 238 / 0.6), rgb(34 211 238 / 0.8))"
+                              : "linear-gradient(to right, rgb(34 211 238 / 0.1), rgb(34 211 238 / 0.2))",
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               ))}

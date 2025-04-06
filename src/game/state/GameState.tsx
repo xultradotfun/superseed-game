@@ -461,7 +461,10 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
           ...prev,
           [selectedPlantType]: prev[selectedPlantType] - 1,
         }));
-        setSelectedPlantType(null);
+        // Only exit planting mode if we run out of the selected seed
+        if (inventory[selectedPlantType] <= 1) {
+          setSelectedPlantType(null);
+        }
         soundSystem.play("ui", "success");
       }
     }
