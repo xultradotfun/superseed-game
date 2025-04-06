@@ -200,6 +200,7 @@ export interface GameState {
   claimSuperSeed: () => boolean;
   showVictoryModal: (props: VictoryModalProps) => void;
   showIntroModal: () => void;
+  showConceptModal: (plantType: PlantType) => void;
 }
 
 const GameStateContext = createContext<GameState | null>(null);
@@ -562,11 +563,20 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     checkSeedUnlocks();
   }, [inventory.LuminaBloom]);
 
+  const showConceptModal = (plantType: PlantType) => {
+    window.dispatchEvent(
+      new CustomEvent("showConceptModal", { detail: { plantType } })
+    );
+  };
+
   const purchaseSeed = (type: PlantType) => {
     if (!canPurchaseSeed(type)) return false;
 
     const config = SEED_SHOP_CONFIG[type as keyof typeof SEED_SHOP_CONFIG];
     if (!config) return false;
+
+    // Check if this is the first time purchasing this seed type
+    const isFirstPurchase = inventory[type] === 0;
 
     setInventory((prev) => ({
       ...prev,
@@ -575,6 +585,12 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     }));
 
     soundSystem.play("ui", "success");
+
+    // Show concept modal for first-time purchases
+    if (isFirstPurchase) {
+      showConceptModal(type);
+    }
+
     return true;
   };
 
@@ -640,6 +656,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     claimSuperSeed,
     showVictoryModal,
     showIntroModal,
+    showConceptModal,
   };
 
   return (
