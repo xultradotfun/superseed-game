@@ -216,6 +216,10 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     const currentGrowthStage = currentPlant.growthStage || 0;
     const newGrowthStage = Math.min(1, currentGrowthStage + 0.2);
 
+    // Check if plant is newly reaching full growth
+    const wasFullyGrown = currentGrowthStage >= 1;
+    const isNowFullyGrown = newGrowthStage >= 1;
+
     setPlants((prev) => ({
       ...prev,
       [id]: {
@@ -228,9 +232,11 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     // Play water drop sound
     soundSystem.play("effects", "water-drop");
 
-    // If the plant just reached full growth, play the fully grown sound
-    if (newGrowthStage >= 1 && currentGrowthStage < 1) {
+    // If the plant just reached full growth
+    if (isNowFullyGrown && !wasFullyGrown) {
       soundSystem.play("effects", "fully-grown");
+      // Check achievements when a plant reaches full growth
+      checkPlantGrowthAchievements();
     }
   };
 
@@ -369,16 +375,20 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
 
     setGameProgress((prev) => {
       const updatedAchievements = prev.achievements.map((achievement) => {
-        if (achievement.id === "efficient_gardener" && !achievement.completed) {
-          const isNowCompleted = fullGrownPlants >= achievement.maxProgress;
-          if (isNowCompleted) {
+        if (achievement.id === "efficient_gardener") {
+          // Track the highest number of simultaneous plants we've had
+          const newProgress = Math.max(achievement.progress, fullGrownPlants);
+          const isNowCompleted = newProgress >= achievement.maxProgress;
+
+          if (isNowCompleted && !achievement.completed) {
             console.log("Efficient Gardener achievement completed!");
             soundSystem.play("ui", "success");
           }
+
           return {
             ...achievement,
-            progress: fullGrownPlants,
-            completed: isNowCompleted,
+            progress: newProgress,
+            completed: isNowCompleted || achievement.completed, // Once completed, stays completed
           };
         }
         return achievement;
