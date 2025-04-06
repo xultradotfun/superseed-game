@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { BasePlant, BasePlantProps } from "./BasePlant";
-import { ParticleSystem } from "@/game/effects/ParticleSystem";
 
 type DeFiDandelionProps = Omit<BasePlantProps, "config" | "renderPlantModel">;
 
@@ -40,7 +39,10 @@ export function DeFiDandelion(props: DeFiDandelionProps) {
                 color={config.colors.primary}
                 emissive={config.colors.primary}
                 emissiveIntensity={
-                  0.3 * growthStage * (hoveredPlantId === id ? 2 : 1)
+                  0.3 *
+                  growthStage *
+                  (hoveredPlantId === id ? 2 : 1) *
+                  (isReleasing ? 1.5 : 1)
                 }
                 metalness={0.2}
                 roughness={0.8}
@@ -54,9 +56,9 @@ export function DeFiDandelion(props: DeFiDandelionProps) {
                 <mesh
                   key={i}
                   position={[
-                    Math.cos(angle) * 0.25,
-                    Math.sin(angle) * 0.1,
-                    Math.sin(angle) * 0.25,
+                    Math.cos(angle) * 0.25 * (isReleasing ? 1.1 : 1),
+                    Math.sin(angle) * 0.1 * (isReleasing ? 1.2 : 1),
+                    Math.sin(angle) * 0.25 * (isReleasing ? 1.1 : 1),
                   ]}
                 >
                   <sphereGeometry args={[0.03, 8, 8]} />
@@ -64,7 +66,10 @@ export function DeFiDandelion(props: DeFiDandelionProps) {
                     color={config.colors.secondary}
                     emissive={config.colors.secondary}
                     emissiveIntensity={
-                      0.5 * growthStage * (hoveredPlantId === id ? 2 : 1)
+                      0.5 *
+                      growthStage *
+                      (hoveredPlantId === id ? 2 : 1) *
+                      (isReleasing ? 1.3 : 1)
                     }
                     metalness={0.3}
                     roughness={0.6}

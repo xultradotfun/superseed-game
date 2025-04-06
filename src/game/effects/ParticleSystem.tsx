@@ -76,10 +76,14 @@ export function ParticleSystem({
       const scale = 1 - particle.life / particle.maxLife;
       matrix.makeScale(scale * size, scale * size, scale * size);
       matrix.setPosition(particle.position);
-      meshRef.current.setMatrixAt(i, matrix);
+      if (meshRef.current) {
+        meshRef.current.setMatrixAt(i, matrix);
+      }
     });
 
-    meshRef.current.instanceMatrix.needsUpdate = true;
+    if (meshRef.current) {
+      meshRef.current.instanceMatrix.needsUpdate = true;
+    }
   });
 
   return (

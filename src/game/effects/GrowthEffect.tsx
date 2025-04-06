@@ -22,7 +22,7 @@ export function GrowthEffect({
   useEffect(() => {
     if (growthStage > lastGrowthRef.current) {
       setIsGrowing(true);
-      soundSystem.playSound("grow");
+      soundSystem.play("effects", "grow");
       setTimeout(() => setIsGrowing(false), 2000); // Effect duration
     }
     lastGrowthRef.current = growthStage;
