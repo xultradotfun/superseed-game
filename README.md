@@ -146,3 +146,4 @@ This is a desktop-only experience optimized for modern browsers. Mobile devices 
 - [Superseed Website](https://superseed.xyz)
 - [Follow Creator](https://x.com/0x_ultra)
 - [Play Game](https://superseed.xultra.fun)
+- [Prompt History](https://gist.github.com/0x-ultra/97ed2d338cdf287a48146f46a55ced2c)
