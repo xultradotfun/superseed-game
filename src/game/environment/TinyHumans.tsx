@@ -6,6 +6,7 @@ import { Vector3, Group, MathUtils } from "three";
 import { useGameState } from "@/game/state/GameState";
 import { ChatBubble } from "./ChatBubble";
 import { GnomeMode } from "./GnomeMode";
+import { GnomeHut } from "./GnomeHut";
 
 // Create a context for gnome mode
 export const GnomeModeContext = createContext<{
@@ -22,6 +23,9 @@ const GNOME_MESSAGES = [
   "Want to join our gnome community? Just find all of us! 🎯",
   "One more gnome to meet and you can become one of us! 🧙‍♂️",
   "Welcome to the gnome life! 🪄",
+  "Time for a quick rest in our cozy hut! 🏠",
+  "The garden needs some extra care today! 🌺",
+  "Nothing better than gardening with friends! 👥",
 ];
 
 type Human = {
@@ -29,7 +33,7 @@ type Human = {
   targetPosition: Vector3;
   rotation: number;
   targetRotation: number;
-  action: "walking" | "watering" | "observing";
+  action: "walking" | "watering" | "observing" | "resting" | "gardening";
   actionTimer: number;
   skinTone: string;
   clothesColor: string;
@@ -143,6 +147,7 @@ export function TinyHumans() {
 
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
+    const hutPosition = new Vector3(-2, 0, 2);
 
     humans.current.forEach((human, index) => {
       // Update action timer
@@ -150,9 +155,11 @@ export function TinyHumans() {
 
       // Choose new action when timer expires
       if (human.actionTimer <= 0) {
+        const random = Math.random();
+
         if (human.action === "walking") {
-          // 20% chance to start watering if near a plant
-          if (Math.random() < 0.2 && Object.values(plants).length > 0) {
+          if (random < 0.2 && Object.values(plants).length > 0) {
+            // Water plants (20% chance)
             const randomPlant =
               Object.values(plants)[
                 Math.floor(Math.random() * Object.values(plants).length)
@@ -164,17 +171,59 @@ export function TinyHumans() {
                 randomPlant.position[2]
               );
               human.targetPosition.copy(plantPos);
-              // Add offset in the direction they're facing
               const offset = new Vector3(0.5, 0, 0.5);
               offset.applyAxisAngle(new Vector3(0, 1, 0), human.rotation);
               human.targetPosition.add(offset);
               human.action = "watering";
-              human.actionTimer = 3 + Math.random() * 2; // Water for 3-5 seconds
+              human.actionTimer = 3 + Math.random() * 2;
             }
+          } else if (random < 0.4) {
+            // Rest in hut (20% chance)
+            human.targetPosition.copy(hutPosition);
+            const offset = new Vector3((Math.random() - 0.5) * 0.5, 0, 1);
+            human.targetPosition.add(offset);
+            human.action = "resting";
+            human.actionTimer = 5 + Math.random() * 3;
+            human.message = "Time for a quick rest in our cozy hut! 🏠";
+            setShowMessages((prev) => {
+              const newMessages = [...prev];
+              newMessages[index] = true;
+              setTimeout(() => {
+                setShowMessages((prev) => {
+                  const newMessages = [...prev];
+                  newMessages[index] = false;
+                  return newMessages;
+                });
+              }, 3000);
+              return newMessages;
+            });
+          } else if (random < 0.6) {
+            // Garden around hut (20% chance)
+            const gardenSpot = new Vector3(
+              hutPosition.x + (Math.random() - 0.5) * 2,
+              0,
+              hutPosition.z + (Math.random() - 0.5) * 2
+            );
+            human.targetPosition.copy(gardenSpot);
+            human.action = "gardening";
+            human.actionTimer = 4 + Math.random() * 2;
+            human.message = "The garden needs some extra care today! 🌺";
+            setShowMessages((prev) => {
+              const newMessages = [...prev];
+              newMessages[index] = true;
+              setTimeout(() => {
+                setShowMessages((prev) => {
+                  const newMessages = [...prev];
+                  newMessages[index] = false;
+                  return newMessages;
+                });
+              }, 3000);
+              return newMessages;
+            });
           } else {
-            // Choose new random position on the island
+            // Random walk (40% chance)
             const angle = Math.random() * Math.PI * 2;
-            const radius = 3.5 + Math.random() * 1; // Keep within island radius (4.5 max)
+            const radius = 3.5 + Math.random() * 1;
             const x = Math.cos(angle) * radius;
             const z = Math.sin(angle) * radius;
             human.targetPosition.set(x, 0, z);
@@ -182,7 +231,7 @@ export function TinyHumans() {
               human.targetPosition.x - human.position.x,
               human.targetPosition.z - human.position.z
             );
-            human.actionTimer = 4 + Math.random() * 3; // Walk for longer
+            human.actionTimer = 4 + Math.random() * 3;
           }
         } else {
           // Return to walking
@@ -233,6 +282,7 @@ export function TinyHumans() {
   return (
     <GnomeModeContext.Provider value={{ isGnomeMode, setGnomeMode }}>
       <group>
+        <GnomeHut />
         {isGnomeMode && <GnomeMode />}
         {humans.current.map((human, index) => (
           <group
@@ -462,6 +512,23 @@ export function TinyHumans() {
                     transparent
                     opacity={0.6}
                   />
+                </mesh>
+              </group>
+            )}
+
+            {/* Add gardening tools when gardening */}
+            {human.action === "gardening" && (
+              <group
+                position={[-0.6, 0.2, 0.2]}
+                rotation={[0, 0, -Math.PI / 4]}
+              >
+                <mesh>
+                  <cylinderGeometry args={[0.05, 0.05, 0.8, 8]} />
+                  <meshStandardMaterial color="#8B4513" />
+                </mesh>
+                <mesh position={[0, -0.4, 0]} rotation={[Math.PI / 2, 0, 0]}>
+                  <coneGeometry args={[0.15, 0.3, 8]} />
+                  <meshStandardMaterial color="#A0522D" metalness={0.3} />
                 </mesh>
               </group>
             )}
