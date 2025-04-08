@@ -1,5 +1,3 @@
 - animations
 - little humans
-- plane easter egg
 - update README
-- optimisation for shareability
