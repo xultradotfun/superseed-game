@@ -22,15 +22,13 @@ export function GameCanvas() {
   const { plants } = useGameState();
 
   const renderPlant = (plant: Plant) => {
-    const position = plant.position;
-
     switch (plant.type) {
       case "LuminaBloom":
         return (
           <LuminaBloom
             key={plant.id}
             id={plant.id}
-            position={position}
+            position={plant.position}
             growthStage={plant.growthStage}
           />
         );
@@ -39,7 +37,7 @@ export function GameCanvas() {
           <EthereumEssence
             key={plant.id}
             id={plant.id}
-            position={position}
+            position={plant.position}
             growthStage={plant.growthStage}
           />
         );
@@ -48,7 +46,7 @@ export function GameCanvas() {
           <OPStackOrchid
             key={plant.id}
             id={plant.id}
-            position={position}
+            position={plant.position}
             growthStage={plant.growthStage}
           />
         );
@@ -57,7 +55,7 @@ export function GameCanvas() {
           <DeFiDandelion
             key={plant.id}
             id={plant.id}
-            position={position}
+            position={plant.position}
             growthStage={plant.growthStage}
           />
         );
@@ -66,7 +64,7 @@ export function GameCanvas() {
           <SuperSeedPlant
             key={plant.id}
             id={plant.id}
-            position={position}
+            position={plant.position}
             growthStage={plant.growthStage}
           />
         );

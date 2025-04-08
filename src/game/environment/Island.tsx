@@ -4,22 +4,25 @@ import { useRef } from "react";
 import { Mesh, Vector3 } from "three";
 import { useThree, ThreeEvent } from "@react-three/fiber";
 import { useGameState } from "@/game/state/GameState";
+import { PlantingIndicator } from "./PlantingIndicator";
+
+export const islandRef = { current: null as Mesh | null };
 
 export function Island() {
-  const islandRef = useRef<Mesh>(null);
+  const meshRef = useRef<Mesh>(null);
   const { selectedPlantType, handlePlanting } = useGameState();
   const { raycaster, camera, pointer } = useThree();
 
   // Handle click events for planting
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
-    if (!selectedPlantType || !islandRef.current) return;
+    if (!selectedPlantType || !meshRef.current) return;
 
     // Update the raycaster with current pointer position
     raycaster.setFromCamera(pointer, camera);
 
     // Check intersection with the island
-    const intersects = raycaster.intersectObject(islandRef.current);
+    const intersects = raycaster.intersectObject(meshRef.current);
 
     if (intersects.length > 0) {
       const point = intersects[0].point;
@@ -45,7 +48,10 @@ export function Island() {
 
       {/* Main island body */}
       <mesh
-        ref={islandRef}
+        ref={(mesh) => {
+          meshRef.current = mesh;
+          islandRef.current = mesh;
+        }}
         position={[0, -0.6, 0]}
         receiveShadow
         onClick={handleClick}
@@ -88,23 +94,25 @@ export function Island() {
 
       {/* Edge details - grass tufts */}
       {Array.from({ length: 12 }).map((_, i) => {
-        const angle = (i / 12) * Math.PI * 2 + Math.random() * 0.5;
-        const radius = 4.8 + Math.random() * 0.4;
+        const angle = (i / 12) * Math.PI * 2;
+        const radius = 5;
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
         return (
-          <group key={`grass-${i}`} position={[x, 0.1, z]}>
+          <group key={`grass-${i}`} position={[x, 0, z]}>
             <mesh receiveShadow>
-              <coneGeometry args={[0.2, 0.4, 4]} />
+              <sphereGeometry args={[0.2 + Math.random() * 0.1, 4, 4]} />
               <meshStandardMaterial
-                color="#9ee054"
-                roughness={0.8}
+                color="#9ed854"
+                roughness={1}
                 metalness={0.0}
               />
             </mesh>
           </group>
         );
       })}
+
+      <PlantingIndicator />
     </group>
   );
 }
