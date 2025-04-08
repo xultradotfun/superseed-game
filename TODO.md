@@ -1,7 +1,5 @@
 - animations
-- placement indicator
 - little humans
 - plane easter egg
-- different sounds across UI
 - update README
 - optimisation for shareability
