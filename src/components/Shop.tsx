@@ -66,9 +66,14 @@ export function Shop({ isOpen, onToggle }: ShopProps) {
   };
 
   return (
-    <button onClick={onToggle} className="relative group">
-      <div className="bg-cyan-500/10 backdrop-blur-md p-2 rounded-xl text-cyan-300 hover:bg-cyan-500/20 transition-all border border-cyan-500/20 shadow-lg shadow-cyan-500/5">
-        <FaStore className="w-5 h-5 group-hover:scale-110 transition-transform" />
+    <div className="relative">
+      <div className="relative group">
+        <button
+          onClick={onToggle}
+          className="bg-cyan-500/10 backdrop-blur-md p-2 rounded-xl text-cyan-300 hover:bg-cyan-500/20 transition-all border border-cyan-500/20 shadow-lg shadow-cyan-500/5"
+        >
+          <FaStore className="w-5 h-5 group-hover:scale-110 transition-transform" />
+        </button>
       </div>
 
       {isOpen && (
@@ -151,58 +156,64 @@ export function Shop({ isOpen, onToggle }: ShopProps) {
                       </div>
                     </div>
 
-                    <div className="mt-2.5 pt-2.5 border-t border-cyan-500/10 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="flex items-center gap-1.5 bg-cyan-500/5 px-2 py-1 rounded-md border border-cyan-500/10">
-                          <span className="text-base">
-                            {details.cost.type === "LuminaBloom"
-                              ? "🌟"
-                              : SEED_DETAILS[
-                                  details.cost.type as Exclude<
-                                    PlantType,
-                                    "LuminaBloom" | "SuperSeed"
-                                  >
-                                ]?.emoji}
-                          </span>
-                          <span className="text-xs font-medium text-cyan-100 whitespace-nowrap">
-                            {details.cost.amount} {details.cost.type}
-                          </span>
+                    <div className="mt-2.5 pt-2.5 border-t border-cyan-500/10">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 bg-cyan-500/5 px-2 py-1 rounded-md border border-cyan-500/10">
+                            <span className="text-base">
+                              {details.cost.type === "LuminaBloom"
+                                ? "🌟"
+                                : SEED_DETAILS[
+                                    details.cost.type as Exclude<
+                                      PlantType,
+                                      "LuminaBloom" | "SuperSeed"
+                                    >
+                                  ]?.emoji}
+                            </span>
+                            <span className="text-xs font-medium text-cyan-100 whitespace-nowrap">
+                              {details.cost.amount} {details.cost.type}
+                            </span>
+                          </div>
+                          <p
+                            className={`text-[10px] ${
+                              state.currentAmount >= details.cost.amount
+                                ? "text-cyan-400"
+                                : "text-cyan-300/40"
+                            }`}
+                          >
+                            ({state.currentAmount}/{state.requiredAmount})
+                          </p>
                         </div>
-                        <p
-                          className={`text-[10px] ${
-                            state.currentAmount >= details.cost.amount
-                              ? "text-cyan-400"
-                              : "text-cyan-300/40"
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            purchaseSeed(type);
+                          }}
+                          disabled={!state.canAfford}
+                          className={`w-full px-3 py-1.5 rounded-md flex items-center justify-center gap-1.5 font-medium transition-all duration-300 text-xs ${
+                            state.canAfford
+                              ? "bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 hover:from-cyan-500/30 hover:to-cyan-400/30 border border-cyan-400/30 hover:border-cyan-400/50 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20"
+                              : "bg-slate-900/30 border border-white/5 cursor-not-allowed"
                           }`}
                         >
-                          ({state.currentAmount}/{state.requiredAmount})
-                        </p>
+                          <FaSeedling
+                            className={`w-3 h-3 ${
+                              state.canAfford
+                                ? "text-cyan-400"
+                                : "text-white/20"
+                            }`}
+                          />
+                          <span
+                            className={
+                              state.canAfford
+                                ? "text-cyan-100"
+                                : "text-white/40"
+                            }
+                          >
+                            Purchase
+                          </span>
+                        </button>
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          purchaseSeed(type);
-                        }}
-                        disabled={!state.canAfford}
-                        className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 font-medium transition-all duration-300 text-xs ${
-                          state.canAfford
-                            ? "bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 hover:from-cyan-500/30 hover:to-cyan-400/30 border border-cyan-400/30 hover:border-cyan-400/50 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20"
-                            : "bg-slate-900/30 border border-white/5 cursor-not-allowed"
-                        }`}
-                      >
-                        <FaSeedling
-                          className={`w-3 h-3 ${
-                            state.canAfford ? "text-cyan-400" : "text-white/20"
-                          }`}
-                        />
-                        <span
-                          className={
-                            state.canAfford ? "text-cyan-100" : "text-white/40"
-                          }
-                        >
-                          Purchase
-                        </span>
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -211,6 +222,6 @@ export function Shop({ isOpen, onToggle }: ShopProps) {
           </div>
         </div>
       )}
-    </button>
+    </div>
   );
 }

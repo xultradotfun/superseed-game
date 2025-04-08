@@ -40,7 +40,7 @@ const CONCEPT_CONTENT: Partial<Record<PlantType, ConceptContent>> = {
     links: [
       {
         text: "Learn more about Proof of Repayment",
-        url: "https://docs.superseed.finance/concepts/proof-of-repayment",
+        url: "https://docs.superseed.xyz/core-concepts/proof-of-repayment",
         description: "Dive deep into the mechanics of PoR",
       },
     ],
@@ -62,7 +62,7 @@ const CONCEPT_CONTENT: Partial<Record<PlantType, ConceptContent>> = {
     links: [
       {
         text: "Explore Supercollateral",
-        url: "https://docs.superseed.finance/concepts/supercollateral",
+        url: "https://docs.superseed.xyz/core-concepts/supercollateral",
         description: "Understand how your collateral works harder for you",
       },
     ],
@@ -84,7 +84,7 @@ const CONCEPT_CONTENT: Partial<Record<PlantType, ConceptContent>> = {
     links: [
       {
         text: "Discover CDP Protocol",
-        url: "https://docs.superseed.finance/concepts/cdp-protocol",
+        url: "https://docs.superseed.xyz/core-concepts/cdp-protocol",
         description: "Learn about the future of DeFi lending",
       },
     ],
