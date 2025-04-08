@@ -25,6 +25,13 @@ const ACTION_DURATIONS = {
   WALKING: [2, 4], // 2-4 seconds for returning to walking
 } as const;
 
+// Message settings
+const MESSAGE_SETTINGS = {
+  CHANCE: 0.3, // 30% chance to show a message when eligible
+  COOLDOWN: 8000, // 8 seconds minimum between messages
+  DISPLAY_TIME: 3000, // 3 seconds message display time
+} as const;
+
 // Create a context for gnome mode
 export const GnomeModeContext = createContext<{
   isGnomeMode: boolean;
@@ -92,6 +99,7 @@ export function TinyHumans() {
   const [clickCount, setClickCount] = useState(0);
   const [showMessages, setShowMessages] = useState<boolean[]>([]);
   const [isGnomeMode, setGnomeMode] = useState(false);
+  const lastMessageTimes = useRef<number[]>([]);
 
   // Initialize humans with new properties
   useMemo(() => {
@@ -162,6 +170,37 @@ export function TinyHumans() {
     }
   };
 
+  // Function to check if enough time has passed since last message
+  const canShowMessage = (index: number) => {
+    const now = Date.now();
+    if (!lastMessageTimes.current[index]) {
+      lastMessageTimes.current[index] = 0;
+    }
+    return now - lastMessageTimes.current[index] >= MESSAGE_SETTINGS.COOLDOWN;
+  };
+
+  // Function to show message with cooldown and chance
+  const tryShowMessage = (index: number, message: string) => {
+    if (canShowMessage(index) && Math.random() < MESSAGE_SETTINGS.CHANCE) {
+      lastMessageTimes.current[index] = Date.now();
+      humans.current[index].message = message;
+      setShowMessages((prev) => {
+        const newMessages = [...prev];
+        newMessages[index] = true;
+        setTimeout(() => {
+          setShowMessages((prev) => {
+            const newMessages = [...prev];
+            newMessages[index] = false;
+            return newMessages;
+          });
+        }, MESSAGE_SETTINGS.DISPLAY_TIME);
+        return newMessages;
+      });
+      return true;
+    }
+    return false;
+  };
+
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
     const hutPosition = new Vector3(-2, 0, 2);
@@ -200,6 +239,9 @@ export function TinyHumans() {
                 Math.random() *
                   (ACTION_DURATIONS.WATER_PLANTS[1] -
                     ACTION_DURATIONS.WATER_PLANTS[0]);
+              human.message =
+                "These plants are thirsty! Time for some water! 💧";
+              tryShowMessage(index, human.message);
             }
           } else if (
             random <
@@ -216,18 +258,7 @@ export function TinyHumans() {
                 (ACTION_DURATIONS.REST_IN_HUT[1] -
                   ACTION_DURATIONS.REST_IN_HUT[0]);
             human.message = "Time for a quick rest in our cozy hut! 🏠";
-            setShowMessages((prev) => {
-              const newMessages = [...prev];
-              newMessages[index] = true;
-              setTimeout(() => {
-                setShowMessages((prev) => {
-                  const newMessages = [...prev];
-                  newMessages[index] = false;
-                  return newMessages;
-                });
-              }, 3000);
-              return newMessages;
-            });
+            tryShowMessage(index, human.message);
           } else if (
             random <
             ACTION_PROBABILITIES.WATER_PLANTS +
@@ -247,18 +278,7 @@ export function TinyHumans() {
               Math.random() *
                 (ACTION_DURATIONS.GARDEN[1] - ACTION_DURATIONS.GARDEN[0]);
             human.message = "The garden needs some extra care today! 🌺";
-            setShowMessages((prev) => {
-              const newMessages = [...prev];
-              newMessages[index] = true;
-              setTimeout(() => {
-                setShowMessages((prev) => {
-                  const newMessages = [...prev];
-                  newMessages[index] = false;
-                  return newMessages;
-                });
-              }, 3000);
-              return newMessages;
-            });
+            tryShowMessage(index, human.message);
           } else {
             // Random walk
             const angle = Math.random() * Math.PI * 2;
