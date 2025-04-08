@@ -17,6 +17,7 @@ import { SuperSeedPlant } from "@/game/plants/SuperSeedPlant";
 import { SceneLighting } from "@/game/environment/SceneLighting";
 import { Sky } from "@/game/environment/Sky";
 import { useGameState, Plant } from "@/game/state/GameState";
+import { TinyHumans } from "@/game/environment/TinyHumans";
 
 export function GameCanvas() {
   const { plants } = useGameState();
@@ -97,6 +98,7 @@ export function GameCanvas() {
         {/* Game Elements */}
         <Island />
         {Object.values(plants).map(renderPlant)}
+        <TinyHumans />
 
         {/* Controls */}
         <OrbitControls
