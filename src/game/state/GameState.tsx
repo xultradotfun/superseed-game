@@ -79,7 +79,7 @@ type GameProgress = {
   unlockedSeeds: PlantType[]; // Track which seeds are available in the shop
 };
 
-const INITIAL_ACHIEVEMENTS: Achievement[] = [
+export const INITIAL_ACHIEVEMENTS: Achievement[] = [
   {
     id: "master_lumina",
     name: "Lumina Master",
@@ -117,12 +117,20 @@ const INITIAL_ACHIEVEMENTS: Achievement[] = [
     prophecyPiece: 3,
   },
   {
-    id: "grow_first_plant",
+    id: "first_steps",
     name: "First Steps",
-    description: "Grow your first plant to completion",
-    completed: false,
+    description: "Plant your first Lumina Bloom",
     progress: 0,
     maxProgress: 1,
+    completed: false,
+  },
+  {
+    id: "find_airplane",
+    name: "Sky High Secret",
+    description: "Found the mysterious airplane in the sky",
+    progress: 0,
+    maxProgress: 1,
+    completed: false,
   },
   {
     id: "efficient_gardener",
@@ -238,6 +246,38 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     soundSystem.startAmbientMusic();
     return () => soundSystem.stopMusic();
+  }, []);
+
+  // Add achievement update event listener
+  useEffect(() => {
+    const handleAchievementUpdate = (event: CustomEvent) => {
+      const { id, progress, completed } = event.detail;
+      setGameProgress((prev) => ({
+        ...prev,
+        achievements: prev.achievements.map((achievement) => {
+          if (achievement.id === id) {
+            return {
+              ...achievement,
+              progress,
+              completed,
+            };
+          }
+          return achievement;
+        }),
+      }));
+      soundSystem.play("ui", "success");
+    };
+
+    window.addEventListener(
+      "updateAchievement",
+      handleAchievementUpdate as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        "updateAchievement",
+        handleAchievementUpdate as EventListener
+      );
+    };
   }, []);
 
   // Show intro modal when game starts
@@ -394,7 +434,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
               progress: newPerfectGrowths,
               completed: isNowCompleted,
             };
-          } else if (achievement.id === "grow_first_plant") {
+          } else if (achievement.id === "first_steps") {
             return { ...achievement, progress: 1, completed: true };
           } else if (achievement.id === "seed_collector") {
             return {
