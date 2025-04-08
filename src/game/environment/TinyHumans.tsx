@@ -8,6 +8,23 @@ import { ChatBubble } from "./ChatBubble";
 import { GnomeMode } from "./GnomeMode";
 import { GnomeHut } from "./GnomeHut";
 
+// Action probabilities (must sum to 1)
+const ACTION_PROBABILITIES = {
+  WATER_PLANTS: 0.25, // 25% chance to water plants
+  REST_IN_HUT: 0.1, // 10% chance to rest
+  GARDEN: 0.25, // 25% chance to garden
+  RANDOM_WALK: 0.4, // 40% chance to walk randomly
+} as const;
+
+// Action durations in seconds
+const ACTION_DURATIONS = {
+  WATER_PLANTS: [3, 5], // 3-5 seconds
+  REST_IN_HUT: [4, 6], // 4-6 seconds
+  GARDEN: [4, 6], // 4-6 seconds
+  RANDOM_WALK: [4, 7], // 4-7 seconds
+  WALKING: [2, 4], // 2-4 seconds for returning to walking
+} as const;
+
 // Create a context for gnome mode
 export const GnomeModeContext = createContext<{
   isGnomeMode: boolean;
@@ -158,8 +175,11 @@ export function TinyHumans() {
         const random = Math.random();
 
         if (human.action === "walking") {
-          if (random < 0.2 && Object.values(plants).length > 0) {
-            // Water plants (20% chance)
+          if (
+            random < ACTION_PROBABILITIES.WATER_PLANTS &&
+            Object.values(plants).length > 0
+          ) {
+            // Water plants
             const randomPlant =
               Object.values(plants)[
                 Math.floor(Math.random() * Object.values(plants).length)
@@ -175,15 +195,26 @@ export function TinyHumans() {
               offset.applyAxisAngle(new Vector3(0, 1, 0), human.rotation);
               human.targetPosition.add(offset);
               human.action = "watering";
-              human.actionTimer = 3 + Math.random() * 2;
+              human.actionTimer =
+                ACTION_DURATIONS.WATER_PLANTS[0] +
+                Math.random() *
+                  (ACTION_DURATIONS.WATER_PLANTS[1] -
+                    ACTION_DURATIONS.WATER_PLANTS[0]);
             }
-          } else if (random < 0.4) {
-            // Rest in hut (20% chance)
+          } else if (
+            random <
+            ACTION_PROBABILITIES.WATER_PLANTS + ACTION_PROBABILITIES.REST_IN_HUT
+          ) {
+            // Rest in hut
             human.targetPosition.copy(hutPosition);
             const offset = new Vector3((Math.random() - 0.5) * 0.5, 0, 1);
             human.targetPosition.add(offset);
             human.action = "resting";
-            human.actionTimer = 5 + Math.random() * 3;
+            human.actionTimer =
+              ACTION_DURATIONS.REST_IN_HUT[0] +
+              Math.random() *
+                (ACTION_DURATIONS.REST_IN_HUT[1] -
+                  ACTION_DURATIONS.REST_IN_HUT[0]);
             human.message = "Time for a quick rest in our cozy hut! 🏠";
             setShowMessages((prev) => {
               const newMessages = [...prev];
@@ -197,8 +228,13 @@ export function TinyHumans() {
               }, 3000);
               return newMessages;
             });
-          } else if (random < 0.6) {
-            // Garden around hut (20% chance)
+          } else if (
+            random <
+            ACTION_PROBABILITIES.WATER_PLANTS +
+              ACTION_PROBABILITIES.REST_IN_HUT +
+              ACTION_PROBABILITIES.GARDEN
+          ) {
+            // Garden around hut
             const gardenSpot = new Vector3(
               hutPosition.x + (Math.random() - 0.5) * 2,
               0,
@@ -206,7 +242,10 @@ export function TinyHumans() {
             );
             human.targetPosition.copy(gardenSpot);
             human.action = "gardening";
-            human.actionTimer = 4 + Math.random() * 2;
+            human.actionTimer =
+              ACTION_DURATIONS.GARDEN[0] +
+              Math.random() *
+                (ACTION_DURATIONS.GARDEN[1] - ACTION_DURATIONS.GARDEN[0]);
             human.message = "The garden needs some extra care today! 🌺";
             setShowMessages((prev) => {
               const newMessages = [...prev];
@@ -221,7 +260,7 @@ export function TinyHumans() {
               return newMessages;
             });
           } else {
-            // Random walk (40% chance)
+            // Random walk
             const angle = Math.random() * Math.PI * 2;
             const radius = 3.5 + Math.random() * 1;
             const x = Math.cos(angle) * radius;
@@ -231,12 +270,19 @@ export function TinyHumans() {
               human.targetPosition.x - human.position.x,
               human.targetPosition.z - human.position.z
             );
-            human.actionTimer = 4 + Math.random() * 3;
+            human.actionTimer =
+              ACTION_DURATIONS.RANDOM_WALK[0] +
+              Math.random() *
+                (ACTION_DURATIONS.RANDOM_WALK[1] -
+                  ACTION_DURATIONS.RANDOM_WALK[0]);
           }
         } else {
           // Return to walking
           human.action = "walking";
-          human.actionTimer = 2 + Math.random() * 2;
+          human.actionTimer =
+            ACTION_DURATIONS.WALKING[0] +
+            Math.random() *
+              (ACTION_DURATIONS.WALKING[1] - ACTION_DURATIONS.WALKING[0]);
         }
       }
 

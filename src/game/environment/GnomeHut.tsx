@@ -1,6 +1,12 @@
 "use client";
 
+import { useLoader } from "@react-three/fiber";
+import { TextureLoader } from "three";
+
 export function GnomeHut() {
+  // Load the meme texture
+  const memeTexture = useLoader(TextureLoader, "/iloveyou.jpg");
+
   return (
     <group position={[-2, 0, 2]} rotation={[0, -Math.PI / 2, 0]}>
       {/* Main hut body */}
@@ -9,10 +15,32 @@ export function GnomeHut() {
         <meshStandardMaterial color="#8B4513" roughness={0.8} />
       </mesh>
 
+      {/* Interior meme walls - both sides */}
+      <group position={[0, 0.3, -0.4]}>
+        {/* Front facing wall */}
+        <mesh rotation={[0, Math.PI, 0]}>
+          <planeGeometry args={[0.4, 0.4]} />
+          <meshStandardMaterial
+            map={memeTexture}
+            emissive="#ffffff"
+            emissiveIntensity={0.1}
+          />
+        </mesh>
+        {/* Back facing wall */}
+        <mesh rotation={[0, 0, 0]}>
+          <planeGeometry args={[0.4, 0.4]} />
+          <meshStandardMaterial
+            map={memeTexture}
+            emissive="#ffffff"
+            emissiveIntensity={0.1}
+          />
+        </mesh>
+      </group>
+
       {/* Roof */}
       <mesh position={[0, 0.9, 0]} castShadow>
         <coneGeometry args={[1.2, 0.8, 8]} />
-        <meshStandardMaterial color="#A0522D" roughness={0.7} />
+        <meshStandardMaterial color="#654321" roughness={0.7} />
       </mesh>
 
       {/* Door */}

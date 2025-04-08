@@ -59,7 +59,7 @@ export function SuperSeedPlant(props: SuperSeedProps) {
             message:
               "Congratulations, brave gardener! You've discovered and grown the legendary SuperSeed - a mystical plant inspired by Superseed, the first blockchain that repays your debt.\n\n" +
               "Through your mastery of the garden's ethereal plants, you've unlocked the secrets of Supercollateral: a revolutionary system of self-repaying loans powered by Proof of Repayment.\n\n" +
-              "Your SuperSeedjourney has only begun...",
+              "Your SuperSeed journey has only begun...",
             links: [
               {
                 text: "🌐 Explore Superseed Mainnet",
