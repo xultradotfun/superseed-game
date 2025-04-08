@@ -1,9 +1,28 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState, createContext } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Vector3, Group, MathUtils } from "three";
 import { useGameState } from "@/game/state/GameState";
+import { ChatBubble } from "./ChatBubble";
+import { GnomeMode } from "./GnomeMode";
+
+// Create a context for gnome mode
+export const GnomeModeContext = createContext<{
+  isGnomeMode: boolean;
+  setGnomeMode: (value: boolean) => void;
+}>({ isGnomeMode: false, setGnomeMode: () => {} });
+
+// Gnome chat messages
+const GNOME_MESSAGES = [
+  "Hello there! I'm just tending to these plants! 🌱",
+  "Have you seen my red hat anywhere? Oh wait, it's on my head! 😅",
+  "The garden is looking lovely today! 🌸",
+  "I've been watering plants all day, my arms are tired! 💪",
+  "Want to join our gnome community? Just find all of us! 🎯",
+  "One more gnome to meet and you can become one of us! 🧙‍♂️",
+  "Welcome to the gnome life! 🪄",
+];
 
 type Human = {
   position: Vector3;
@@ -17,6 +36,8 @@ type Human = {
   hatColor: string;
   walkCycle: number;
   lastUpdateTime: number;
+  clicked: boolean;
+  message: string;
 };
 
 const SKIN_TONES = [
@@ -47,11 +68,14 @@ export function TinyHumans() {
   const humanRefs = useRef<Group[]>([]);
   const humans = useRef<Human[]>([]);
   const { plants } = useGameState();
+  const [clickCount, setClickCount] = useState(0);
+  const [showMessages, setShowMessages] = useState<boolean[]>([]);
+  const [isGnomeMode, setGnomeMode] = useState(false);
 
-  // Initialize humans
+  // Initialize humans with new properties
   useMemo(() => {
     const numHumans = 5;
-    humans.current = Array.from({ length: numHumans }, () => {
+    humans.current = Array.from({ length: numHumans }, (_, index) => {
       const colorIndex = Math.floor(Math.random() * 5);
       return {
         position: new Vector3(
@@ -69,9 +93,53 @@ export function TinyHumans() {
         skinTone: SKIN_TONES[colorIndex],
         clothesColor: CLOTHES_COLORS[colorIndex],
         hatColor: HAT_COLORS[colorIndex],
+        clicked: false,
+        message: GNOME_MESSAGES[index],
       };
     });
+    setShowMessages(new Array(numHumans).fill(false));
   }, []);
+
+  // Handle gnome clicks
+  const handleGnomeClick = (index: number) => {
+    if (!humans.current[index].clicked) {
+      humans.current[index].clicked = true;
+      const newCount = clickCount + 1;
+      setClickCount(newCount);
+
+      // Update message based on click count
+      const message =
+        newCount === 5
+          ? "Welcome to the gnome life!🪄"
+          : newCount === 4
+          ? "One more gnome to meet and you can become one of us! 🧙‍♂️"
+          : GNOME_MESSAGES[index];
+
+      humans.current[index].message = message;
+
+      if (newCount === 5) {
+        // All gnomes clicked, enable gnome mode after a delay
+        setTimeout(() => {
+          setGnomeMode(true);
+        }, 2000);
+      }
+
+      // Show message for this gnome
+      setShowMessages((prev) => {
+        const newMessages = [...prev];
+        newMessages[index] = true;
+        // Hide message after 3 seconds
+        setTimeout(() => {
+          setShowMessages((prev) => {
+            const newMessages = [...prev];
+            newMessages[index] = false;
+            return newMessages;
+          });
+        }, 3000);
+        return newMessages;
+      });
+    }
+  };
 
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
@@ -163,222 +231,243 @@ export function TinyHumans() {
   });
 
   return (
-    <group>
-      {humans.current.map((human, index) => (
-        <group
-          key={index}
-          ref={(el) => (humanRefs.current[index] = el!)}
-          scale={0.15} // Make them tiny!
-          position={[0, 0, 0]} // Base position, actual height added in position update
-        >
-          {/* Body - Clothes */}
-          <mesh position={[0, 0, 0]}>
-            <capsuleGeometry args={[0.35, 0.5, 12, 16]} />
-            <meshStandardMaterial color={human.clothesColor} />
-          </mesh>
-
-          {/* Belt */}
-          <mesh position={[0, 0, 0]}>
-            <torusGeometry args={[0.37, 0.08, 8, 16]} />
-            <meshStandardMaterial color="#4A4E69" metalness={0.3} />
-          </mesh>
-
-          {/* Head with face */}
-          <group position={[0, 0.6, 0]}>
-            {/* Face */}
-            <mesh>
-              <sphereGeometry args={[0.3, 12, 12]} />
-              <meshStandardMaterial color={human.skinTone} />
-            </mesh>
-
-            {/* Beard */}
-            <mesh position={[0, -0.15, 0.1]} scale={[1, 0.7, 0.5]}>
-              <sphereGeometry args={[0.25, 12, 12]} />
-              <meshStandardMaterial color="white" />
-            </mesh>
-
-            {/* Eyes */}
-            <mesh position={[0.1, 0.05, 0.25]} rotation={[0, 0, 0]}>
-              <sphereGeometry args={[0.05, 8, 8]} />
-              <meshStandardMaterial color="#000000" />
-            </mesh>
-            <mesh position={[-0.1, 0.05, 0.25]} rotation={[0, 0, 0]}>
-              <sphereGeometry args={[0.05, 8, 8]} />
-              <meshStandardMaterial color="#000000" />
-            </mesh>
-
-            {/* Nose */}
-            <mesh position={[0, 0, 0.3]}>
-              <sphereGeometry args={[0.08, 8, 8]} />
-              <meshStandardMaterial color={human.skinTone} />
-            </mesh>
-
-            {/* Gnome Hat */}
-            <group position={[0, 0.3, 0]}>
-              {/* Hat base */}
-              <mesh position={[0, 0, 0]} rotation={[0.2, 0, 0]}>
-                <cylinderGeometry args={[0.3, 0.35, 0.4, 12]} />
-                <meshStandardMaterial color={human.hatColor} />
-              </mesh>
-              {/* Hat top */}
-              <mesh position={[0, 0.4, 0]} rotation={[0.2, 0, 0]}>
-                <coneGeometry args={[0.3, 0.8, 12]} />
-                <meshStandardMaterial color={human.hatColor} />
-              </mesh>
-            </group>
-          </group>
-
-          {/* Arms with animation */}
+    <GnomeModeContext.Provider value={{ isGnomeMode, setGnomeMode }}>
+      <group>
+        {isGnomeMode && <GnomeMode />}
+        {humans.current.map((human, index) => (
           <group
-            position={[0, 0.2, 0]}
-            rotation={[0, 0, human.action === "watering" ? -Math.PI / 4 : 0]}
+            key={index}
+            ref={(el) => (humanRefs.current[index] = el!)}
+            scale={0.15}
+            position={[0, 0, 0]}
+            onClick={(e) => {
+              // Stop event propagation to prevent clicking through
+              e.stopPropagation();
+              if (!isGnomeMode) {
+                handleGnomeClick(index);
+              }
+            }}
           >
-            {/* Sleeves */}
-            <mesh
-              position={[-0.4, 0, 0]}
-              rotation={[
-                0,
-                0,
-                human.action === "walking"
-                  ? Math.sin(human.walkCycle) * 0.3
-                  : 0,
-              ]}
-            >
-              <capsuleGeometry args={[0.12, 0.4, 8, 8]} />
-              <meshStandardMaterial color={human.clothesColor} />
-            </mesh>
-            <mesh
-              position={[0.4, 0, 0]}
-              rotation={[
-                0,
-                0,
-                human.action === "walking"
-                  ? -Math.sin(human.walkCycle) * 0.3
-                  : 0,
-              ]}
-            >
-              <capsuleGeometry args={[0.12, 0.4, 8, 8]} />
-              <meshStandardMaterial color={human.clothesColor} />
-            </mesh>
-            {/* Hands */}
-            <mesh
-              position={[-0.4, -0.2, 0]}
-              rotation={[
-                0,
-                0,
-                human.action === "walking"
-                  ? Math.sin(human.walkCycle) * 0.3
-                  : 0,
-              ]}
-            >
-              <sphereGeometry args={[0.12, 8, 8]} />
-              <meshStandardMaterial color={human.skinTone} />
-            </mesh>
-            <mesh
-              position={[0.4, -0.2, 0]}
-              rotation={[
-                0,
-                0,
-                human.action === "walking"
-                  ? -Math.sin(human.walkCycle) * 0.3
-                  : 0,
-              ]}
-            >
-              <sphereGeometry args={[0.12, 8, 8]} />
-              <meshStandardMaterial color={human.skinTone} />
-            </mesh>
-          </group>
+            {showMessages[index] && (
+              <ChatBubble
+                message={human.message}
+                visible={true}
+                position={[0, 3, 0]}
+              />
+            )}
 
-          {/* Legs with walking animation */}
-          <group position={[0, -0.3, 0]}>
-            {/* Boots */}
-            <mesh
-              position={[-0.2, 0, 0]}
-              rotation={[
-                human.action === "walking"
-                  ? Math.sin(human.walkCycle) * 0.3
-                  : 0,
-                0,
-                0,
-              ]}
-            >
-              <boxGeometry args={[0.25, 0.2, 0.35]} />
+            {/* Body - Clothes */}
+            <mesh position={[0, 0, 0]}>
+              <capsuleGeometry args={[0.35, 0.5, 12, 16]} />
+              <meshStandardMaterial color={human.clothesColor} />
+            </mesh>
+
+            {/* Belt */}
+            <mesh position={[0, 0, 0]}>
+              <torusGeometry args={[0.37, 0.08, 8, 16]} />
               <meshStandardMaterial color="#4A4E69" metalness={0.3} />
             </mesh>
-            <mesh
-              position={[0.2, 0, 0]}
-              rotation={[
-                human.action === "walking"
-                  ? -Math.sin(human.walkCycle) * 0.3
-                  : 0,
-                0,
-                0,
-              ]}
-            >
-              <boxGeometry args={[0.25, 0.2, 0.35]} />
-              <meshStandardMaterial color="#4A4E69" metalness={0.3} />
-            </mesh>
-            {/* Legs */}
-            <mesh
-              position={[-0.2, 0.25, 0]}
-              rotation={[
-                human.action === "walking"
-                  ? Math.sin(human.walkCycle) * 0.3
-                  : 0,
-                0,
-                0,
-              ]}
-            >
-              <capsuleGeometry args={[0.12, 0.3, 8, 8]} />
-              <meshStandardMaterial color={human.clothesColor} />
-            </mesh>
-            <mesh
-              position={[0.2, 0.25, 0]}
-              rotation={[
-                human.action === "walking"
-                  ? -Math.sin(human.walkCycle) * 0.3
-                  : 0,
-                0,
-                0,
-              ]}
-            >
-              <capsuleGeometry args={[0.12, 0.3, 8, 8]} />
-              <meshStandardMaterial color={human.clothesColor} />
-            </mesh>
-          </group>
 
-          {/* Watering can with water particles */}
-          {human.action === "watering" && (
-            <group position={[-0.6, 0.2, 0.2]} rotation={[0, 0, -Math.PI / 4]}>
+            {/* Head with face */}
+            <group position={[0, 0.6, 0]}>
+              {/* Face */}
               <mesh>
-                <boxGeometry args={[0.3, 0.3, 0.3]} />
-                <meshStandardMaterial
-                  color="#4A4E69"
-                  metalness={0.6}
-                  roughness={0.2}
-                />
+                <sphereGeometry args={[0.3, 12, 12]} />
+                <meshStandardMaterial color={human.skinTone} />
               </mesh>
-              <mesh position={[0.2, 0, 0]}>
-                <cylinderGeometry args={[0.05, 0.05, 0.4, 8]} />
-                <meshStandardMaterial
-                  color="#4A4E69"
-                  metalness={0.6}
-                  roughness={0.2}
-                />
+
+              {/* Beard */}
+              <mesh position={[0, -0.15, 0.1]} scale={[1, 0.7, 0.5]}>
+                <sphereGeometry args={[0.25, 12, 12]} />
+                <meshStandardMaterial color="white" />
               </mesh>
-              {/* Water stream */}
-              <mesh position={[0.4, -0.2, 0]} rotation={[0, 0, Math.PI / 4]}>
-                <cylinderGeometry args={[0.02, 0.01, 0.4, 8]} />
-                <meshStandardMaterial
-                  color="#7ad7ff"
-                  transparent
-                  opacity={0.6}
-                />
+
+              {/* Eyes */}
+              <mesh position={[0.1, 0.05, 0.25]} rotation={[0, 0, 0]}>
+                <sphereGeometry args={[0.05, 8, 8]} />
+                <meshStandardMaterial color="#000000" />
+              </mesh>
+              <mesh position={[-0.1, 0.05, 0.25]} rotation={[0, 0, 0]}>
+                <sphereGeometry args={[0.05, 8, 8]} />
+                <meshStandardMaterial color="#000000" />
+              </mesh>
+
+              {/* Nose */}
+              <mesh position={[0, 0, 0.3]}>
+                <sphereGeometry args={[0.08, 8, 8]} />
+                <meshStandardMaterial color={human.skinTone} />
+              </mesh>
+
+              {/* Gnome Hat */}
+              <group position={[0, 0.3, 0]}>
+                {/* Hat base */}
+                <mesh position={[0, 0, 0]} rotation={[0.2, 0, 0]}>
+                  <cylinderGeometry args={[0.3, 0.35, 0.4, 12]} />
+                  <meshStandardMaterial color={human.hatColor} />
+                </mesh>
+                {/* Hat top */}
+                <mesh position={[0, 0.4, 0]} rotation={[0.2, 0, 0]}>
+                  <coneGeometry args={[0.3, 0.8, 12]} />
+                  <meshStandardMaterial color={human.hatColor} />
+                </mesh>
+              </group>
+            </group>
+
+            {/* Arms with animation */}
+            <group
+              position={[0, 0.2, 0]}
+              rotation={[0, 0, human.action === "watering" ? -Math.PI / 4 : 0]}
+            >
+              {/* Sleeves */}
+              <mesh
+                position={[-0.4, 0, 0]}
+                rotation={[
+                  0,
+                  0,
+                  human.action === "walking"
+                    ? Math.sin(human.walkCycle) * 0.3
+                    : 0,
+                ]}
+              >
+                <capsuleGeometry args={[0.12, 0.4, 8, 8]} />
+                <meshStandardMaterial color={human.clothesColor} />
+              </mesh>
+              <mesh
+                position={[0.4, 0, 0]}
+                rotation={[
+                  0,
+                  0,
+                  human.action === "walking"
+                    ? -Math.sin(human.walkCycle) * 0.3
+                    : 0,
+                ]}
+              >
+                <capsuleGeometry args={[0.12, 0.4, 8, 8]} />
+                <meshStandardMaterial color={human.clothesColor} />
+              </mesh>
+              {/* Hands */}
+              <mesh
+                position={[-0.4, -0.2, 0]}
+                rotation={[
+                  0,
+                  0,
+                  human.action === "walking"
+                    ? Math.sin(human.walkCycle) * 0.3
+                    : 0,
+                ]}
+              >
+                <sphereGeometry args={[0.12, 8, 8]} />
+                <meshStandardMaterial color={human.skinTone} />
+              </mesh>
+              <mesh
+                position={[0.4, -0.2, 0]}
+                rotation={[
+                  0,
+                  0,
+                  human.action === "walking"
+                    ? -Math.sin(human.walkCycle) * 0.3
+                    : 0,
+                ]}
+              >
+                <sphereGeometry args={[0.12, 8, 8]} />
+                <meshStandardMaterial color={human.skinTone} />
               </mesh>
             </group>
-          )}
-        </group>
-      ))}
-    </group>
+
+            {/* Legs with walking animation */}
+            <group position={[0, -0.3, 0]}>
+              {/* Boots */}
+              <mesh
+                position={[-0.2, 0, 0]}
+                rotation={[
+                  human.action === "walking"
+                    ? Math.sin(human.walkCycle) * 0.3
+                    : 0,
+                  0,
+                  0,
+                ]}
+              >
+                <boxGeometry args={[0.25, 0.2, 0.35]} />
+                <meshStandardMaterial color="#4A4E69" metalness={0.3} />
+              </mesh>
+              <mesh
+                position={[0.2, 0, 0]}
+                rotation={[
+                  human.action === "walking"
+                    ? -Math.sin(human.walkCycle) * 0.3
+                    : 0,
+                  0,
+                  0,
+                ]}
+              >
+                <boxGeometry args={[0.25, 0.2, 0.35]} />
+                <meshStandardMaterial color="#4A4E69" metalness={0.3} />
+              </mesh>
+              {/* Legs */}
+              <mesh
+                position={[-0.2, 0.25, 0]}
+                rotation={[
+                  human.action === "walking"
+                    ? Math.sin(human.walkCycle) * 0.3
+                    : 0,
+                  0,
+                  0,
+                ]}
+              >
+                <capsuleGeometry args={[0.12, 0.3, 8, 8]} />
+                <meshStandardMaterial color={human.clothesColor} />
+              </mesh>
+              <mesh
+                position={[0.2, 0.25, 0]}
+                rotation={[
+                  human.action === "walking"
+                    ? -Math.sin(human.walkCycle) * 0.3
+                    : 0,
+                  0,
+                  0,
+                ]}
+              >
+                <capsuleGeometry args={[0.12, 0.3, 8, 8]} />
+                <meshStandardMaterial color={human.clothesColor} />
+              </mesh>
+            </group>
+
+            {/* Watering can with water particles */}
+            {human.action === "watering" && (
+              <group
+                position={[-0.6, 0.2, 0.2]}
+                rotation={[0, 0, -Math.PI / 4]}
+              >
+                <mesh>
+                  <boxGeometry args={[0.3, 0.3, 0.3]} />
+                  <meshStandardMaterial
+                    color="#4A4E69"
+                    metalness={0.6}
+                    roughness={0.2}
+                  />
+                </mesh>
+                <mesh position={[0.2, 0, 0]}>
+                  <cylinderGeometry args={[0.05, 0.05, 0.4, 8]} />
+                  <meshStandardMaterial
+                    color="#4A4E69"
+                    metalness={0.6}
+                    roughness={0.2}
+                  />
+                </mesh>
+                {/* Water stream */}
+                <mesh position={[0.4, -0.2, 0]} rotation={[0, 0, Math.PI / 4]}>
+                  <cylinderGeometry args={[0.02, 0.01, 0.4, 8]} />
+                  <meshStandardMaterial
+                    color="#7ad7ff"
+                    transparent
+                    opacity={0.6}
+                  />
+                </mesh>
+              </group>
+            )}
+          </group>
+        ))}
+      </group>
+    </GnomeModeContext.Provider>
   );
 }
