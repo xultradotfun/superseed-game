@@ -23,7 +23,7 @@ export function Island() {
         const z = Math.sin(angle) * radius;
         const scale = 0.1 + Math.random() * 0.15;
         const rotation = Math.random() * Math.PI;
-        const color = Math.random() > 0.5 ? "#9ed854" : "#8ed349";
+        const color = Math.random() > 0.5 ? "#2E7D32" : "#388E3C";
         return { x, z, scale, rotation, color };
       }),
     []
@@ -117,7 +117,7 @@ export function Island() {
       >
         <cylinderGeometry args={[5.2, 5.8, 1.2, 12]} />
         <meshStandardMaterial
-          color="#7ec544"
+          color="#2E7D32"
           roughness={0.8}
           metalness={0.0}
           onBeforeCompile={(shader) => {
@@ -224,9 +224,9 @@ export function Island() {
               "#include <color_fragment>",
               `
               // Base grass colors
-              vec3 grassColor = vec3(0.494, 0.773, 0.267);
-              vec3 darkGrassColor = vec3(0.392, 0.612, 0.212);
-              vec3 lightGrassColor = vec3(0.596, 0.835, 0.322);
+              vec3 grassColor = vec3(0.180, 0.490, 0.196);      // #2E7D32
+              vec3 darkGrassColor = vec3(0.180, 0.490, 0.196);  // #2E7D32
+              vec3 lightGrassColor = vec3(0.220, 0.557, 0.235); // #388E3C
               vec3 dirtColor = vec3(0.545, 0.371, 0.220);
 
               // Create varied grass pattern
@@ -320,7 +320,7 @@ export function Island() {
           <mesh receiveShadow>
             <sphereGeometry args={[tuft.scale, 4, 4]} />
             <meshStandardMaterial
-              color="#9ed854"
+              color="#388E3C"
               roughness={1}
               metalness={0.0}
             />

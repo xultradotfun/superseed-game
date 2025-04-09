@@ -86,7 +86,6 @@ export function GameCanvas() {
 
         {/* Sky and Atmosphere */}
         <Sky />
-        <fog attach="fog" args={["#7CC6DE", 30, 60]} />
 
         {/* Enhanced shadows */}
         <SoftShadows size={40} samples={20} focus={0.5} />

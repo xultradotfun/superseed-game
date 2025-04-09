@@ -18,13 +18,13 @@ export function SceneLighting() {
   return (
     <>
       {/* Bright blue-tinted ambient light for overall illumination */}
-      <ambientLight intensity={0.6} color="#b3d9ff" />
+      <ambientLight intensity={0.8} color="#cce6ff" />
 
       {/* Main directional light (sun) */}
       <directionalLight
         ref={mainLightRef}
         position={[-5, 8, -5]}
-        intensity={1.2}
+        intensity={1.4}
         color="#fff5e6"
         castShadow
         shadow-mapSize={[2048, 2048]}
@@ -41,12 +41,12 @@ export function SceneLighting() {
       <directionalLight
         ref={fillLightRef}
         position={[4, 6, 4]}
-        intensity={0.8}
+        intensity={1.0}
         color="#ffedd6"
       />
 
       {/* Subtle rim light */}
-      <directionalLight position={[0, 2, -8]} intensity={0.3} color="#b3e6ff" />
+      <directionalLight position={[0, 2, -8]} intensity={0.4} color="#b3e6ff" />
 
       {/* Post-processing effects */}
       <EffectComposer>
@@ -68,22 +68,19 @@ export function SceneLighting() {
 
         {/* Brightness and contrast adjustment */}
         <BrightnessContrast
-          brightness={0.1} // Slightly brighter
-          contrast={0.1} // Slightly more contrast
+          brightness={0.15} // Increased brightness
+          contrast={0.1}
         />
 
         {/* Color enhancement */}
-        <HueSaturation
-          hue={0} // No hue shift
-          saturation={0.15} // Slightly more saturated
-        />
+        <HueSaturation hue={0} saturation={0.15} />
       </EffectComposer>
 
       {/* Hemisphere light for sky/ground color interaction */}
       <hemisphereLight
-        color="#b3e6ff" // Sky color (light blue)
-        groundColor="#509d3f" // Ground color (grass green)
-        intensity={0.5}
+        color="#cce6ff" // Brighter sky color
+        groundColor="#66BB6A" // Brighter ground color
+        intensity={0.6}
       />
     </>
   );

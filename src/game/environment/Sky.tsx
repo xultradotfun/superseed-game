@@ -362,16 +362,34 @@ function Cloud({
       {/* Main cloud body */}
       <mesh>
         <sphereGeometry args={[2, 16, 16]} />
-        <meshStandardMaterial color="white" />
+        <meshStandardMaterial
+          color="#ffffff"
+          emissive="#ffffff"
+          emissiveIntensity={0.05}
+          roughness={0.95}
+          metalness={0}
+        />
       </mesh>
       {/* Additional puffs */}
       <mesh position={[-1.5, -0.2, 0]}>
         <sphereGeometry args={[1.5, 16, 16]} />
-        <meshStandardMaterial color="white" />
+        <meshStandardMaterial
+          color="#ffffff"
+          emissive="#ffffff"
+          emissiveIntensity={0.05}
+          roughness={0.95}
+          metalness={0}
+        />
       </mesh>
       <mesh position={[1.5, -0.3, 0]}>
         <sphereGeometry args={[1.7, 16, 16]} />
-        <meshStandardMaterial color="white" />
+        <meshStandardMaterial
+          color="#ffffff"
+          emissive="#ffffff"
+          emissiveIntensity={0.05}
+          roughness={0.95}
+          metalness={0}
+        />
       </mesh>
     </group>
   );
@@ -418,15 +436,15 @@ export function Sky() {
   return (
     <FlightModeContext.Provider value={{ isFlightMode, setFlightMode }}>
       {/* Bright blue sky color for background */}
-      <color attach="background" args={["#7CC6DE"]} />
+      <color attach="background" args={["#A7E8FF"]} />
 
       {/* Sky dome with gradient */}
       <mesh>
         <sphereGeometry args={[50, 32, 32]} />
-        <meshBasicMaterial side={BackSide} color="#7CC6DE" fog={false}>
+        <meshBasicMaterial side={BackSide} color="#A7E8FF" fog={false}>
           <GradientTexture
             stops={[0, 0.5, 1]}
-            colors={["#B4E7F8", "#7CC6DE", "#5BB1D0"]}
+            colors={["#D4F5FF", "#A7E8FF", "#7CC6DE"]}
           />
         </meshBasicMaterial>
       </mesh>
